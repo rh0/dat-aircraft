@@ -22725,6 +22725,9 @@ webdb.define('flights', {
   ]
 })
 
+var allFlights = [];
+var flightTable = table(allFlights)
+
 function table(flights) {
   return yo`<table>
     <tr>
@@ -22733,6 +22736,7 @@ function table(flights) {
       <th>Heading</th>
       <th>Lat</th>
       <th>Lon</th>
+      <th>Altitude</th>
     </tr>
     ${flights.map(function(flight) {
       return yo`<tr>
@@ -22741,12 +22745,13 @@ function table(flights) {
           <td>${flight.heading}</td>
           <td>${flight.lat}</td>
           <td>${flight.lng}</td>
+          <td>${flight.altitude}</td>
         </tr>`
     })}
     </table>`
 }
 
-async function run() {
+async function provision() {
   await webdb.open()
   console.log('Open DB')
 
@@ -22755,10 +22760,18 @@ async function run() {
 
   var allFlights = await webdb.flights.toArray()
   console.log(allFlights)
-  var flightTable = table(allFlights)
-  document.body.appendChild(flightTable)
 }
 
-run()
+async function update() {
+  allFlights = await webdb.flights.toArray()
+  var newTable = table(allFlights)
+  yo.update(flightTable, newTable)
+}
+
+provision()
+webdb.on('indexes-updated', (url, version) => {
+  update()
+})
+document.body.appendChild(flightTable)
 
 },{"@beaker/webdb":34,"assert":1,"yo-yo":188}]},{},[190]);
