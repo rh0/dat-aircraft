@@ -6944,7 +6944,7 @@ class WebDB extends EventEmitter {
 module.exports = WebDB
 
 
-},{"./lib/errors":35,"./lib/indexer":37,"./lib/table":40,"./lib/table-def":39,"./lib/util":42,"events":6,"level-browserify":92,"level-promise":105,"lodash.flatten":110,"subleveldown":157}],35:[function(require,module,exports){
+},{"./lib/errors":35,"./lib/indexer":37,"./lib/table":40,"./lib/table-def":39,"./lib/util":42,"events":6,"level-browserify":97,"level-promise":110,"lodash.flatten":115,"subleveldown":165}],35:[function(require,module,exports){
 class ExtendableError extends Error {
   constructor (msg) {
     super(msg)
@@ -7257,7 +7257,7 @@ function normalizeIndexDef (index) {
   return index
 }
 
-},{"./util":42,"level-promise":105,"monotonic-timestamp-base36":118,"stream":28,"subleveldown":157,"xtend":179}],37:[function(require,module,exports){
+},{"./util":42,"level-promise":110,"monotonic-timestamp-base36":123,"stream":28,"subleveldown":165,"xtend":187}],37:[function(require,module,exports){
 
 const flatten = require('lodash.flatten')
 const anymatch = require('anymatch')
@@ -7564,7 +7564,7 @@ async function applyUpdates (db, archive, updates) {
   }))
 }
 
-},{"./util":42,"./util-level":41,"anymatch":48,"lodash.flatten":110}],38:[function(require,module,exports){
+},{"./util":42,"./util-level":41,"anymatch":48,"lodash.flatten":115}],38:[function(require,module,exports){
 const LevelUtil = require('./util-level')
 const WebDBWhereClause = require('./where-clause')
 const Indexer = require('./indexer')
@@ -8140,7 +8140,7 @@ function noop () {}
 
 module.exports = WebDBTable
 
-},{"./errors":35,"./indexed-level":36,"./indexer":37,"./query":38,"./util":42,"anymatch":48,"events":6,"subleveldown":157}],41:[function(require,module,exports){
+},{"./errors":35,"./indexed-level":36,"./indexer":37,"./query":38,"./util":42,"anymatch":48,"events":6,"subleveldown":165}],41:[function(require,module,exports){
 const through2 = require('through2')
 const {assert, debug, veryDebug} = require('./util')
 
@@ -8287,7 +8287,7 @@ function applyUntil (query, value) {
   return (query._until && query._until(value))
 }
 
-},{"./util":42,"through2":175}],42:[function(require,module,exports){
+},{"./util":42,"through2":183}],42:[function(require,module,exports){
 (function (process){
 /* globals window process console URL */
 const AwaitLock = require('await-lock')
@@ -8384,7 +8384,7 @@ exports.lock = async function (key) {
 }
 
 }).call(this,require('_process'))
-},{"_process":13,"await-lock":54,"md5.js":112,"url-parse":177}],43:[function(require,module,exports){
+},{"_process":13,"await-lock":54,"md5.js":117,"url-parse":185}],43:[function(require,module,exports){
 const {assert} = require('./util')
 const {ParameterError, QueryError} = require('./errors')
 const MAX_STRING = String.fromCharCode(65535)
@@ -9107,7 +9107,7 @@ var anymatch = function(criteria, value, returnIndex, startIndex, endIndex) {
 
 module.exports = anymatch;
 
-},{"micromatch":113,"normalize-path":120,"path":11}],49:[function(require,module,exports){
+},{"micromatch":118,"normalize-path":127,"path":11}],49:[function(require,module,exports){
 /*!
  * arr-diff <https://github.com/jonschlinkert/arr-diff>
  *
@@ -9574,6 +9574,161 @@ var AwaitLock = function () {
 exports.default = AwaitLock;
 module.exports = exports['default'];
 },{"assert":1}],55:[function(require,module,exports){
+var document = require('global/document')
+var hyperx = require('hyperx')
+var onload = require('on-load')
+
+var SVGNS = 'http://www.w3.org/2000/svg'
+var XLINKNS = 'http://www.w3.org/1999/xlink'
+
+var BOOL_PROPS = {
+  autofocus: 1,
+  checked: 1,
+  defaultchecked: 1,
+  disabled: 1,
+  formnovalidate: 1,
+  indeterminate: 1,
+  readonly: 1,
+  required: 1,
+  selected: 1,
+  willvalidate: 1
+}
+var COMMENT_TAG = '!--'
+var SVG_TAGS = [
+  'svg',
+  'altGlyph', 'altGlyphDef', 'altGlyphItem', 'animate', 'animateColor',
+  'animateMotion', 'animateTransform', 'circle', 'clipPath', 'color-profile',
+  'cursor', 'defs', 'desc', 'ellipse', 'feBlend', 'feColorMatrix',
+  'feComponentTransfer', 'feComposite', 'feConvolveMatrix', 'feDiffuseLighting',
+  'feDisplacementMap', 'feDistantLight', 'feFlood', 'feFuncA', 'feFuncB',
+  'feFuncG', 'feFuncR', 'feGaussianBlur', 'feImage', 'feMerge', 'feMergeNode',
+  'feMorphology', 'feOffset', 'fePointLight', 'feSpecularLighting',
+  'feSpotLight', 'feTile', 'feTurbulence', 'filter', 'font', 'font-face',
+  'font-face-format', 'font-face-name', 'font-face-src', 'font-face-uri',
+  'foreignObject', 'g', 'glyph', 'glyphRef', 'hkern', 'image', 'line',
+  'linearGradient', 'marker', 'mask', 'metadata', 'missing-glyph', 'mpath',
+  'path', 'pattern', 'polygon', 'polyline', 'radialGradient', 'rect',
+  'set', 'stop', 'switch', 'symbol', 'text', 'textPath', 'title', 'tref',
+  'tspan', 'use', 'view', 'vkern'
+]
+
+function belCreateElement (tag, props, children) {
+  var el
+
+  // If an svg tag, it needs a namespace
+  if (SVG_TAGS.indexOf(tag) !== -1) {
+    props.namespace = SVGNS
+  }
+
+  // If we are using a namespace
+  var ns = false
+  if (props.namespace) {
+    ns = props.namespace
+    delete props.namespace
+  }
+
+  // Create the element
+  if (ns) {
+    el = document.createElementNS(ns, tag)
+  } else if (tag === COMMENT_TAG) {
+    return document.createComment(props.comment)
+  } else {
+    el = document.createElement(tag)
+  }
+
+  // If adding onload events
+  if (props.onload || props.onunload) {
+    var load = props.onload || function () {}
+    var unload = props.onunload || function () {}
+    onload(el, function belOnload () {
+      load(el)
+    }, function belOnunload () {
+      unload(el)
+    },
+    // We have to use non-standard `caller` to find who invokes `belCreateElement`
+    belCreateElement.caller.caller.caller)
+    delete props.onload
+    delete props.onunload
+  }
+
+  // Create the properties
+  for (var p in props) {
+    if (props.hasOwnProperty(p)) {
+      var key = p.toLowerCase()
+      var val = props[p]
+      // Normalize className
+      if (key === 'classname') {
+        key = 'class'
+        p = 'class'
+      }
+      // The for attribute gets transformed to htmlFor, but we just set as for
+      if (p === 'htmlFor') {
+        p = 'for'
+      }
+      // If a property is boolean, set itself to the key
+      if (BOOL_PROPS[key]) {
+        if (val === 'true') val = key
+        else if (val === 'false') continue
+      }
+      // If a property prefers being set directly vs setAttribute
+      if (key.slice(0, 2) === 'on') {
+        el[p] = val
+      } else {
+        if (ns) {
+          if (p === 'xlink:href') {
+            el.setAttributeNS(XLINKNS, p, val)
+          } else if (/^xmlns($|:)/i.test(p)) {
+            // skip xmlns definitions
+          } else {
+            el.setAttributeNS(null, p, val)
+          }
+        } else {
+          el.setAttribute(p, val)
+        }
+      }
+    }
+  }
+
+  function appendChild (childs) {
+    if (!Array.isArray(childs)) return
+    for (var i = 0; i < childs.length; i++) {
+      var node = childs[i]
+      if (Array.isArray(node)) {
+        appendChild(node)
+        continue
+      }
+
+      if (typeof node === 'number' ||
+        typeof node === 'boolean' ||
+        typeof node === 'function' ||
+        node instanceof Date ||
+        node instanceof RegExp) {
+        node = node.toString()
+      }
+
+      if (typeof node === 'string') {
+        if (el.lastChild && el.lastChild.nodeName === '#text') {
+          el.lastChild.nodeValue += node
+          continue
+        }
+        node = document.createTextNode(node)
+      }
+
+      if (node && node.nodeType) {
+        el.appendChild(node)
+      }
+    }
+  }
+  appendChild(children)
+
+  return el
+}
+
+module.exports = hyperx(belCreateElement, {comments: true})
+module.exports.default = module.exports
+module.exports.createElement = belCreateElement
+
+},{"global/document":77,"hyperx":81,"on-load":133}],56:[function(require,module,exports){
 /*!
  * braces <https://github.com/jonschlinkert/braces>
  *
@@ -9974,7 +10129,7 @@ function filter(arr, cb) {
   return res;
 }
 
-},{"expand-range":68,"preserve":127,"repeat-element":152}],56:[function(require,module,exports){
+},{"expand-range":69,"preserve":135,"repeat-element":160}],57:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10085,7 +10240,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js")})
-},{"../../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":9}],57:[function(require,module,exports){
+},{"../../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":9}],58:[function(require,module,exports){
 var util = require('util')
   , AbstractIterator = require('abstract-leveldown').AbstractIterator
 
@@ -10121,7 +10276,7 @@ DeferredIterator.prototype._operation = function (method, args) {
 
 module.exports = DeferredIterator;
 
-},{"abstract-leveldown":62,"util":33}],58:[function(require,module,exports){
+},{"abstract-leveldown":63,"util":33}],59:[function(require,module,exports){
 (function (Buffer,process){
 var util              = require('util')
   , AbstractLevelDOWN = require('abstract-leveldown').AbstractLevelDOWN
@@ -10181,7 +10336,7 @@ module.exports                  = DeferredLevelDOWN
 module.exports.DeferredIterator = DeferredIterator
 
 }).call(this,{"isBuffer":require("../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js")},require('_process'))
-},{"../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":9,"./deferred-iterator":57,"_process":13,"abstract-leveldown":62,"util":33}],59:[function(require,module,exports){
+},{"../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":9,"./deferred-iterator":58,"_process":13,"abstract-leveldown":63,"util":33}],60:[function(require,module,exports){
 (function (process){
 /* Copyright (c) 2017 Rod Vagg, MIT License */
 
@@ -10273,7 +10428,7 @@ AbstractChainedBatch.prototype.write = function (options, callback) {
 module.exports = AbstractChainedBatch
 
 }).call(this,require('_process'))
-},{"_process":13}],60:[function(require,module,exports){
+},{"_process":13}],61:[function(require,module,exports){
 (function (process){
 /* Copyright (c) 2017 Rod Vagg, MIT License */
 
@@ -10326,7 +10481,7 @@ AbstractIterator.prototype.end = function (callback) {
 module.exports = AbstractIterator
 
 }).call(this,require('_process'))
-},{"_process":13}],61:[function(require,module,exports){
+},{"_process":13}],62:[function(require,module,exports){
 (function (Buffer,process){
 /* Copyright (c) 2017 Rod Vagg, MIT License */
 
@@ -10601,13 +10756,13 @@ AbstractLevelDOWN.prototype._checkKey = function (obj, type) {
 module.exports = AbstractLevelDOWN
 
 }).call(this,{"isBuffer":require("../../../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js")},require('_process'))
-},{"../../../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":9,"./abstract-chained-batch":59,"./abstract-iterator":60,"_process":13,"xtend":179}],62:[function(require,module,exports){
+},{"../../../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":9,"./abstract-chained-batch":60,"./abstract-iterator":61,"_process":13,"xtend":187}],63:[function(require,module,exports){
 exports.AbstractLevelDOWN    = require('./abstract-leveldown')
 exports.AbstractIterator     = require('./abstract-iterator')
 exports.AbstractChainedBatch = require('./abstract-chained-batch')
 exports.isLevelDOWN          = require('./is-leveldown')
 
-},{"./abstract-chained-batch":59,"./abstract-iterator":60,"./abstract-leveldown":61,"./is-leveldown":63}],63:[function(require,module,exports){
+},{"./abstract-chained-batch":60,"./abstract-iterator":61,"./abstract-leveldown":62,"./is-leveldown":64}],64:[function(require,module,exports){
 var AbstractLevelDOWN = require('./abstract-leveldown')
 
 function isLevelDOWN (db) {
@@ -10623,14 +10778,14 @@ function isLevelDOWN (db) {
 
 module.exports = isLevelDOWN
 
-},{"./abstract-leveldown":61}],64:[function(require,module,exports){
+},{"./abstract-leveldown":62}],65:[function(require,module,exports){
 module.exports = function () {
     for (var i = 0; i < arguments.length; i++) {
         if (arguments[i] !== undefined) return arguments[i];
     }
 };
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 var prr = require('prr')
 
 function init (type, message, cause) {
@@ -10687,7 +10842,7 @@ module.exports = function (errno) {
   }
 }
 
-},{"prr":137}],66:[function(require,module,exports){
+},{"prr":145}],67:[function(require,module,exports){
 var all = module.exports.all = [
   {
     errno: -2,
@@ -11002,7 +11157,7 @@ all.forEach(function (error) {
 module.exports.custom = require('./custom')(module.exports)
 module.exports.create = module.exports.custom.createError
 
-},{"./custom":65}],67:[function(require,module,exports){
+},{"./custom":66}],68:[function(require,module,exports){
 /*!
  * expand-brackets <https://github.com/jonschlinkert/expand-brackets>
  *
@@ -11167,7 +11322,7 @@ brackets.match = function(arr, pattern) {
   return res;
 };
 
-},{"is-posix-bracket":86}],68:[function(require,module,exports){
+},{"is-posix-bracket":91}],69:[function(require,module,exports){
 /*!
  * expand-range <https://github.com/jonschlinkert/expand-range>
  *
@@ -11212,7 +11367,7 @@ module.exports = function expandRange(str, options, fn) {
   return fill.apply(null, args.concat(fn));
 };
 
-},{"fill-range":71}],69:[function(require,module,exports){
+},{"fill-range":72}],70:[function(require,module,exports){
 /*!
  * extglob <https://github.com/jonschlinkert/extglob>
  *
@@ -11392,7 +11547,7 @@ function toRegex(pattern, contains, isNegated) {
   return new RegExp(prefix + pattern);
 }
 
-},{"is-extglob":83}],70:[function(require,module,exports){
+},{"is-extglob":88}],71:[function(require,module,exports){
 /*!
  * filename-regex <https://github.com/regexps/filename-regex>
  *
@@ -11404,7 +11559,7 @@ module.exports = function filenameRegex() {
   return /([^\\\/]+)$/;
 };
 
-},{}],71:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 /*!
  * fill-range <https://github.com/jonschlinkert/fill-range>
  *
@@ -11814,7 +11969,7 @@ function length(val) {
   return val.toString().length;
 }
 
-},{"is-number":85,"isobject":90,"randomatic":139,"repeat-element":152,"repeat-string":153}],72:[function(require,module,exports){
+},{"is-number":90,"isobject":95,"randomatic":147,"repeat-element":160,"repeat-string":161}],73:[function(require,module,exports){
 /*!
  * for-in <https://github.com/jonschlinkert/for-in>
  *
@@ -11832,7 +11987,7 @@ module.exports = function forIn(obj, fn, thisArg) {
   }
 };
 
-},{}],73:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 /*!
  * for-own <https://github.com/jonschlinkert/for-own>
  *
@@ -11853,7 +12008,7 @@ module.exports = function forOwn(obj, fn, thisArg) {
   });
 };
 
-},{"for-in":72}],74:[function(require,module,exports){
+},{"for-in":73}],75:[function(require,module,exports){
 /*!
  * glob-base <https://github.com/jonschlinkert/glob-base>
  *
@@ -11906,7 +12061,7 @@ function dirname(glob) {
   return path.dirname(glob);
 }
 
-},{"glob-parent":75,"is-glob":84,"path":11}],75:[function(require,module,exports){
+},{"glob-parent":76,"is-glob":89,"path":11}],76:[function(require,module,exports){
 'use strict';
 
 var path = require('path');
@@ -11918,7 +12073,45 @@ module.exports = function globParent(str) {
 	return str;
 };
 
-},{"is-glob":84,"path":11}],76:[function(require,module,exports){
+},{"is-glob":89,"path":11}],77:[function(require,module,exports){
+(function (global){
+var topLevel = typeof global !== 'undefined' ? global :
+    typeof window !== 'undefined' ? window : {}
+var minDoc = require('min-document');
+
+var doccy;
+
+if (typeof document !== 'undefined') {
+    doccy = document;
+} else {
+    doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'];
+
+    if (!doccy) {
+        doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'] = minDoc;
+    }
+}
+
+module.exports = doccy;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"min-document":3}],78:[function(require,module,exports){
+(function (global){
+var win;
+
+if (typeof window !== "undefined") {
+    win = window;
+} else if (typeof global !== "undefined") {
+    win = global;
+} else if (typeof self !== "undefined"){
+    win = self;
+} else {
+    win = {};
+}
+
+module.exports = win;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],79:[function(require,module,exports){
 'use strict'
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('stream').Transform
@@ -12015,7 +12208,311 @@ HashBase.prototype._digest = function () {
 
 module.exports = HashBase
 
-},{"inherits":78,"safe-buffer":155,"stream":28}],77:[function(require,module,exports){
+},{"inherits":83,"safe-buffer":163,"stream":28}],80:[function(require,module,exports){
+module.exports = attributeToProperty
+
+var transform = {
+  'class': 'className',
+  'for': 'htmlFor',
+  'http-equiv': 'httpEquiv'
+}
+
+function attributeToProperty (h) {
+  return function (tagName, attrs, children) {
+    for (var attr in attrs) {
+      if (attr in transform) {
+        attrs[transform[attr]] = attrs[attr]
+        delete attrs[attr]
+      }
+    }
+    return h(tagName, attrs, children)
+  }
+}
+
+},{}],81:[function(require,module,exports){
+var attrToProp = require('hyperscript-attribute-to-property')
+
+var VAR = 0, TEXT = 1, OPEN = 2, CLOSE = 3, ATTR = 4
+var ATTR_KEY = 5, ATTR_KEY_W = 6
+var ATTR_VALUE_W = 7, ATTR_VALUE = 8
+var ATTR_VALUE_SQ = 9, ATTR_VALUE_DQ = 10
+var ATTR_EQ = 11, ATTR_BREAK = 12
+var COMMENT = 13
+
+module.exports = function (h, opts) {
+  if (!opts) opts = {}
+  var concat = opts.concat || function (a, b) {
+    return String(a) + String(b)
+  }
+  if (opts.attrToProp !== false) {
+    h = attrToProp(h)
+  }
+
+  return function (strings) {
+    var state = TEXT, reg = ''
+    var arglen = arguments.length
+    var parts = []
+
+    for (var i = 0; i < strings.length; i++) {
+      if (i < arglen - 1) {
+        var arg = arguments[i+1]
+        var p = parse(strings[i])
+        var xstate = state
+        if (xstate === ATTR_VALUE_DQ) xstate = ATTR_VALUE
+        if (xstate === ATTR_VALUE_SQ) xstate = ATTR_VALUE
+        if (xstate === ATTR_VALUE_W) xstate = ATTR_VALUE
+        if (xstate === ATTR) xstate = ATTR_KEY
+        p.push([ VAR, xstate, arg ])
+        parts.push.apply(parts, p)
+      } else parts.push.apply(parts, parse(strings[i]))
+    }
+
+    var tree = [null,{},[]]
+    var stack = [[tree,-1]]
+    for (var i = 0; i < parts.length; i++) {
+      var cur = stack[stack.length-1][0]
+      var p = parts[i], s = p[0]
+      if (s === OPEN && /^\//.test(p[1])) {
+        var ix = stack[stack.length-1][1]
+        if (stack.length > 1) {
+          stack.pop()
+          stack[stack.length-1][0][2][ix] = h(
+            cur[0], cur[1], cur[2].length ? cur[2] : undefined
+          )
+        }
+      } else if (s === OPEN) {
+        var c = [p[1],{},[]]
+        cur[2].push(c)
+        stack.push([c,cur[2].length-1])
+      } else if (s === ATTR_KEY || (s === VAR && p[1] === ATTR_KEY)) {
+        var key = ''
+        var copyKey
+        for (; i < parts.length; i++) {
+          if (parts[i][0] === ATTR_KEY) {
+            key = concat(key, parts[i][1])
+          } else if (parts[i][0] === VAR && parts[i][1] === ATTR_KEY) {
+            if (typeof parts[i][2] === 'object' && !key) {
+              for (copyKey in parts[i][2]) {
+                if (parts[i][2].hasOwnProperty(copyKey) && !cur[1][copyKey]) {
+                  cur[1][copyKey] = parts[i][2][copyKey]
+                }
+              }
+            } else {
+              key = concat(key, parts[i][2])
+            }
+          } else break
+        }
+        if (parts[i][0] === ATTR_EQ) i++
+        var j = i
+        for (; i < parts.length; i++) {
+          if (parts[i][0] === ATTR_VALUE || parts[i][0] === ATTR_KEY) {
+            if (!cur[1][key]) cur[1][key] = strfn(parts[i][1])
+            else parts[i][1]==="" || (cur[1][key] = concat(cur[1][key], parts[i][1]));
+          } else if (parts[i][0] === VAR
+          && (parts[i][1] === ATTR_VALUE || parts[i][1] === ATTR_KEY)) {
+            if (!cur[1][key]) cur[1][key] = strfn(parts[i][2])
+            else parts[i][2]==="" || (cur[1][key] = concat(cur[1][key], parts[i][2]));
+          } else {
+            if (key.length && !cur[1][key] && i === j
+            && (parts[i][0] === CLOSE || parts[i][0] === ATTR_BREAK)) {
+              // https://html.spec.whatwg.org/multipage/infrastructure.html#boolean-attributes
+              // empty string is falsy, not well behaved value in browser
+              cur[1][key] = key.toLowerCase()
+            }
+            if (parts[i][0] === CLOSE) {
+              i--
+            }
+            break
+          }
+        }
+      } else if (s === ATTR_KEY) {
+        cur[1][p[1]] = true
+      } else if (s === VAR && p[1] === ATTR_KEY) {
+        cur[1][p[2]] = true
+      } else if (s === CLOSE) {
+        if (selfClosing(cur[0]) && stack.length) {
+          var ix = stack[stack.length-1][1]
+          stack.pop()
+          stack[stack.length-1][0][2][ix] = h(
+            cur[0], cur[1], cur[2].length ? cur[2] : undefined
+          )
+        }
+      } else if (s === VAR && p[1] === TEXT) {
+        if (p[2] === undefined || p[2] === null) p[2] = ''
+        else if (!p[2]) p[2] = concat('', p[2])
+        if (Array.isArray(p[2][0])) {
+          cur[2].push.apply(cur[2], p[2])
+        } else {
+          cur[2].push(p[2])
+        }
+      } else if (s === TEXT) {
+        cur[2].push(p[1])
+      } else if (s === ATTR_EQ || s === ATTR_BREAK) {
+        // no-op
+      } else {
+        throw new Error('unhandled: ' + s)
+      }
+    }
+
+    if (tree[2].length > 1 && /^\s*$/.test(tree[2][0])) {
+      tree[2].shift()
+    }
+
+    if (tree[2].length > 2
+    || (tree[2].length === 2 && /\S/.test(tree[2][1]))) {
+      throw new Error(
+        'multiple root elements must be wrapped in an enclosing tag'
+      )
+    }
+    if (Array.isArray(tree[2][0]) && typeof tree[2][0][0] === 'string'
+    && Array.isArray(tree[2][0][2])) {
+      tree[2][0] = h(tree[2][0][0], tree[2][0][1], tree[2][0][2])
+    }
+    return tree[2][0]
+
+    function parse (str) {
+      var res = []
+      if (state === ATTR_VALUE_W) state = ATTR
+      for (var i = 0; i < str.length; i++) {
+        var c = str.charAt(i)
+        if (state === TEXT && c === '<') {
+          if (reg.length) res.push([TEXT, reg])
+          reg = ''
+          state = OPEN
+        } else if (c === '>' && !quot(state) && state !== COMMENT) {
+          if (state === OPEN) {
+            res.push([OPEN,reg])
+          } else if (state === ATTR_KEY) {
+            res.push([ATTR_KEY,reg])
+          } else if (state === ATTR_VALUE && reg.length) {
+            res.push([ATTR_VALUE,reg])
+          }
+          res.push([CLOSE])
+          reg = ''
+          state = TEXT
+        } else if (state === COMMENT && /-$/.test(reg) && c === '-') {
+          if (opts.comments) {
+            res.push([ATTR_VALUE,reg.substr(0, reg.length - 1)],[CLOSE])
+          }
+          reg = ''
+          state = TEXT
+        } else if (state === OPEN && /^!--$/.test(reg)) {
+          if (opts.comments) {
+            res.push([OPEN, reg],[ATTR_KEY,'comment'],[ATTR_EQ])
+          }
+          reg = c
+          state = COMMENT
+        } else if (state === TEXT || state === COMMENT) {
+          reg += c
+        } else if (state === OPEN && /\s/.test(c)) {
+          res.push([OPEN, reg])
+          reg = ''
+          state = ATTR
+        } else if (state === OPEN) {
+          reg += c
+        } else if (state === ATTR && /[^\s"'=/]/.test(c)) {
+          state = ATTR_KEY
+          reg = c
+        } else if (state === ATTR && /\s/.test(c)) {
+          if (reg.length) res.push([ATTR_KEY,reg])
+          res.push([ATTR_BREAK])
+        } else if (state === ATTR_KEY && /\s/.test(c)) {
+          res.push([ATTR_KEY,reg])
+          reg = ''
+          state = ATTR_KEY_W
+        } else if (state === ATTR_KEY && c === '=') {
+          res.push([ATTR_KEY,reg],[ATTR_EQ])
+          reg = ''
+          state = ATTR_VALUE_W
+        } else if (state === ATTR_KEY) {
+          reg += c
+        } else if ((state === ATTR_KEY_W || state === ATTR) && c === '=') {
+          res.push([ATTR_EQ])
+          state = ATTR_VALUE_W
+        } else if ((state === ATTR_KEY_W || state === ATTR) && !/\s/.test(c)) {
+          res.push([ATTR_BREAK])
+          if (/[\w-]/.test(c)) {
+            reg += c
+            state = ATTR_KEY
+          } else state = ATTR
+        } else if (state === ATTR_VALUE_W && c === '"') {
+          state = ATTR_VALUE_DQ
+        } else if (state === ATTR_VALUE_W && c === "'") {
+          state = ATTR_VALUE_SQ
+        } else if (state === ATTR_VALUE_DQ && c === '"') {
+          res.push([ATTR_VALUE,reg],[ATTR_BREAK])
+          reg = ''
+          state = ATTR
+        } else if (state === ATTR_VALUE_SQ && c === "'") {
+          res.push([ATTR_VALUE,reg],[ATTR_BREAK])
+          reg = ''
+          state = ATTR
+        } else if (state === ATTR_VALUE_W && !/\s/.test(c)) {
+          state = ATTR_VALUE
+          i--
+        } else if (state === ATTR_VALUE && /\s/.test(c)) {
+          res.push([ATTR_VALUE,reg],[ATTR_BREAK])
+          reg = ''
+          state = ATTR
+        } else if (state === ATTR_VALUE || state === ATTR_VALUE_SQ
+        || state === ATTR_VALUE_DQ) {
+          reg += c
+        }
+      }
+      if (state === TEXT && reg.length) {
+        res.push([TEXT,reg])
+        reg = ''
+      } else if (state === ATTR_VALUE && reg.length) {
+        res.push([ATTR_VALUE,reg])
+        reg = ''
+      } else if (state === ATTR_VALUE_DQ && reg.length) {
+        res.push([ATTR_VALUE,reg])
+        reg = ''
+      } else if (state === ATTR_VALUE_SQ && reg.length) {
+        res.push([ATTR_VALUE,reg])
+        reg = ''
+      } else if (state === ATTR_KEY) {
+        res.push([ATTR_KEY,reg])
+        reg = ''
+      }
+      return res
+    }
+  }
+
+  function strfn (x) {
+    if (typeof x === 'function') return x
+    else if (typeof x === 'string') return x
+    else if (x && typeof x === 'object') return x
+    else return concat('', x)
+  }
+}
+
+function quot (state) {
+  return state === ATTR_VALUE_SQ || state === ATTR_VALUE_DQ
+}
+
+var hasOwn = Object.prototype.hasOwnProperty
+function has (obj, key) { return hasOwn.call(obj, key) }
+
+var closeRE = RegExp('^(' + [
+  'area', 'base', 'basefont', 'bgsound', 'br', 'col', 'command', 'embed',
+  'frame', 'hr', 'img', 'input', 'isindex', 'keygen', 'link', 'meta', 'param',
+  'source', 'track', 'wbr', '!--',
+  // SVG TAGS
+  'animate', 'animateTransform', 'circle', 'cursor', 'desc', 'ellipse',
+  'feBlend', 'feColorMatrix', 'feComposite',
+  'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap',
+  'feDistantLight', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR',
+  'feGaussianBlur', 'feImage', 'feMergeNode', 'feMorphology',
+  'feOffset', 'fePointLight', 'feSpecularLighting', 'feSpotLight', 'feTile',
+  'feTurbulence', 'font-face-format', 'font-face-name', 'font-face-uri',
+  'glyph', 'glyphRef', 'hkern', 'image', 'line', 'missing-glyph', 'mpath',
+  'path', 'polygon', 'polyline', 'rect', 'set', 'stop', 'tref', 'use', 'view',
+  'vkern'
+].join('|') + ')(?:[\.#][a-zA-Z0-9\u007F-\uFFFF_:-]+)*$')
+function selfClosing (tag) { return closeRE.test(tag) }
+
+},{"hyperscript-attribute-to-property":80}],82:[function(require,module,exports){
 /*global window:false, self:false, define:false, module:false */
 
 /**
@@ -13422,11 +13919,11 @@ module.exports = HashBase
 
 }, this);
 
-},{}],78:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],79:[function(require,module,exports){
+},{"dup":8}],84:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],80:[function(require,module,exports){
+},{"dup":9}],85:[function(require,module,exports){
 /*!
  * is-dotfile <https://github.com/jonschlinkert/is-dotfile>
  *
@@ -13442,7 +13939,7 @@ module.exports = function(str) {
   return slash !== -1 ? str.charCodeAt(slash + 1) === 46  /* . */ : false;
 };
 
-},{}],81:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 /*!
  * is-equal-shallow <https://github.com/jonschlinkert/is-equal-shallow>
  *
@@ -13471,7 +13968,7 @@ module.exports = function isEqual(a, b) {
   return numKeysA === numKeysB;
 };
 
-},{"is-primitive":87}],82:[function(require,module,exports){
+},{"is-primitive":92}],87:[function(require,module,exports){
 /*!
  * is-extendable <https://github.com/jonschlinkert/is-extendable>
  *
@@ -13486,7 +13983,7 @@ module.exports = function isExtendable(val) {
     && (typeof val === 'object' || typeof val === 'function');
 };
 
-},{}],83:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 /*!
  * is-extglob <https://github.com/jonschlinkert/is-extglob>
  *
@@ -13499,7 +13996,7 @@ module.exports = function isExtglob(str) {
     && /[@?!+*]\(/.test(str);
 };
 
-},{}],84:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 /*!
  * is-glob <https://github.com/jonschlinkert/is-glob>
  *
@@ -13514,7 +14011,7 @@ module.exports = function isGlob(str) {
     && (/[*!?{}(|)[\]]/.test(str)
      || isExtglob(str));
 };
-},{"is-extglob":83}],85:[function(require,module,exports){
+},{"is-extglob":88}],90:[function(require,module,exports){
 /*!
  * is-number <https://github.com/jonschlinkert/is-number>
  *
@@ -13535,7 +14032,7 @@ module.exports = function isNumber(num) {
   return (n - n + 1) >= 0 && num !== '';
 };
 
-},{"kind-of":91}],86:[function(require,module,exports){
+},{"kind-of":96}],91:[function(require,module,exports){
 /*!
  * is-posix-bracket <https://github.com/jonschlinkert/is-posix-bracket>
  *
@@ -13547,7 +14044,7 @@ module.exports = function isPosixBracket(str) {
   return typeof str === 'string' && /\[([:.=+])(?:[^\[\]]|)+\1\]/.test(str);
 };
 
-},{}],87:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 /*!
  * is-primitive <https://github.com/jonschlinkert/is-primitive>
  *
@@ -13562,9 +14059,9 @@ module.exports = function isPrimitive(value) {
   return value == null || (typeof value !== 'function' && typeof value !== 'object');
 };
 
-},{}],88:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"dup":10}],89:[function(require,module,exports){
+},{"dup":10}],94:[function(require,module,exports){
 var Buffer = require('buffer').Buffer;
 
 module.exports = isBuffer;
@@ -13574,7 +14071,7 @@ function isBuffer (o) {
     || /\[object (.+Array|Array.+)\]/.test(Object.prototype.toString.call(o));
 }
 
-},{"buffer":4}],90:[function(require,module,exports){
+},{"buffer":4}],95:[function(require,module,exports){
 /*!
  * isobject <https://github.com/jonschlinkert/isobject>
  *
@@ -13590,7 +14087,7 @@ module.exports = function isObject(val) {
   return val != null && typeof val === 'object' && isArray(val) === false;
 };
 
-},{"isarray":88}],91:[function(require,module,exports){
+},{"isarray":93}],96:[function(require,module,exports){
 var isBuffer = require('is-buffer');
 var toString = Object.prototype.toString;
 
@@ -13708,7 +14205,7 @@ module.exports = function kindOf(val) {
   return 'object';
 };
 
-},{"is-buffer":79}],92:[function(require,module,exports){
+},{"is-buffer":84}],97:[function(require,module,exports){
 
 var Leveljs = require('level-js')
 
@@ -13716,7 +14213,7 @@ module.exports = require('level-packager')(function(l) {
   return new Leveljs(l)
 })
 
-},{"level-js":97,"level-packager":104}],93:[function(require,module,exports){
+},{"level-js":102,"level-packager":109}],98:[function(require,module,exports){
 var encodings = require('./lib/encodings');
 
 module.exports = Codec;
@@ -13824,7 +14321,7 @@ Codec.prototype.valueAsBuffer = function(opts){
 };
 
 
-},{"./lib/encodings":94}],94:[function(require,module,exports){
+},{"./lib/encodings":99}],99:[function(require,module,exports){
 (function (Buffer){
 exports.utf8 = exports['utf-8'] = {
   encode: function(data){
@@ -13904,7 +14401,7 @@ function isBinary(data){
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":4}],95:[function(require,module,exports){
+},{"buffer":4}],100:[function(require,module,exports){
 /* Copyright (c) 2012-2017 LevelUP contributors
  * See list at <https://github.com/rvagg/node-levelup#contributing>
  * MIT License
@@ -13928,7 +14425,7 @@ module.exports = {
   , EncodingError       : createError('EncodingError', LevelUPError)
 }
 
-},{"errno":66}],96:[function(require,module,exports){
+},{"errno":67}],101:[function(require,module,exports){
 var inherits = require('inherits');
 var Readable = require('readable-stream').Readable;
 var extend = require('xtend');
@@ -13986,7 +14483,7 @@ ReadStream.prototype._cleanup = function(){
 };
 
 
-},{"inherits":78,"level-errors":95,"readable-stream":149,"xtend":179}],97:[function(require,module,exports){
+},{"inherits":83,"level-errors":100,"readable-stream":157,"xtend":187}],102:[function(require,module,exports){
 (function (Buffer){
 module.exports = Level
 
@@ -14164,7 +14661,7 @@ var checkKeyValue = Level.prototype._checkKeyValue = function (obj, type) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./iterator":98,"abstract-leveldown":46,"buffer":4,"idb-wrapper":77,"isbuffer":89,"typedarray-to-buffer":176,"util":33,"xtend":100}],98:[function(require,module,exports){
+},{"./iterator":103,"abstract-leveldown":46,"buffer":4,"idb-wrapper":82,"isbuffer":94,"typedarray-to-buffer":184,"util":33,"xtend":105}],103:[function(require,module,exports){
 var util = require('util')
 var AbstractIterator  = require('abstract-leveldown').AbstractIterator
 var ltgt = require('ltgt')
@@ -14238,7 +14735,7 @@ Iterator.prototype._next = function (callback) {
   this.callback = callback
 }
 
-},{"abstract-leveldown":46,"ltgt":111,"util":33}],99:[function(require,module,exports){
+},{"abstract-leveldown":46,"ltgt":116,"util":33}],104:[function(require,module,exports){
 module.exports = hasKeys
 
 function hasKeys(source) {
@@ -14247,7 +14744,7 @@ function hasKeys(source) {
         typeof source === "function")
 }
 
-},{}],100:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 var Keys = require("object-keys")
 var hasKeys = require("./has-keys")
 
@@ -14274,7 +14771,7 @@ function extend() {
     return target
 }
 
-},{"./has-keys":99,"object-keys":122}],101:[function(require,module,exports){
+},{"./has-keys":104,"object-keys":129}],106:[function(require,module,exports){
 
 var deepExtend = require('deep-extend')
 
@@ -14325,7 +14822,7 @@ module.exports = function manifest (db, terse) {
 }
 
 
-},{"deep-extend":102}],102:[function(require,module,exports){
+},{"deep-extend":107}],107:[function(require,module,exports){
 (function (Buffer){
 /*!
  * Node.JS module "Deep Extend"
@@ -14419,7 +14916,7 @@ var deepExtend = module.exports = function (/*obj_1, [obj_2], [obj_N]*/) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":4}],103:[function(require,module,exports){
+},{"buffer":4}],108:[function(require,module,exports){
 var defined = require('defined');
 
 module.exports = function (opts, prefix) {
@@ -14466,7 +14963,7 @@ module.exports = function (opts, prefix) {
     return xopts;
 };
 
-},{"defined":64}],104:[function(require,module,exports){
+},{"defined":65}],109:[function(require,module,exports){
 const levelup = require('levelup')
 
 function packager (leveldown) {
@@ -14494,7 +14991,7 @@ function packager (leveldown) {
 
 module.exports = packager
 
-},{"levelup":108}],105:[function(require,module,exports){
+},{"levelup":113}],110:[function(require,module,exports){
 'use strict';
 var Manifest = require('level-manifest')
   , substitute = require('./substitute')
@@ -14542,7 +15039,7 @@ function _install(db, manifest) {
   }
 }
 
-},{"./substitute":106,"level-manifest":101}],106:[function(require,module,exports){
+},{"./substitute":111,"level-manifest":106}],111:[function(require,module,exports){
 "use strict";
 var Promise = require('promise')
 
@@ -14563,7 +15060,7 @@ function _wrap(method, methodP) {
   }
 }
 
-},{"promise":129}],107:[function(require,module,exports){
+},{"promise":137}],112:[function(require,module,exports){
 /* Copyright (c) 2012-2016 LevelUP contributors
  * See list at <https://github.com/level/levelup#contributing>
  * MIT License
@@ -14648,7 +15145,7 @@ Batch.prototype.write = function (callback) {
 
 module.exports = Batch
 
-},{"./util":109,"level-errors":95}],108:[function(require,module,exports){
+},{"./util":114,"level-errors":100}],113:[function(require,module,exports){
 (function (process){
 /* Copyright (c) 2012-2016 LevelUP contributors
  * See list at <https://github.com/level/levelup#contributing>
@@ -15015,7 +15512,7 @@ module.exports.repair = deprecate(
 )
 
 }).call(this,require('_process'))
-},{"./batch":107,"./leveldown":3,"./util":109,"_process":13,"deferred-leveldown":58,"events":6,"level-codec":93,"level-errors":95,"level-iterator-stream":96,"prr":137,"util":33,"xtend":179}],109:[function(require,module,exports){
+},{"./batch":112,"./leveldown":3,"./util":114,"_process":13,"deferred-leveldown":59,"events":6,"level-codec":98,"level-errors":100,"level-iterator-stream":101,"prr":145,"util":33,"xtend":187}],114:[function(require,module,exports){
 /* Copyright (c) 2012-2016 LevelUP contributors
  * See list at <https://github.com/level/levelup#contributing>
  * MIT License
@@ -15051,7 +15548,7 @@ module.exports = {
   isDefined: isDefined
 }
 
-},{}],110:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -15404,7 +15901,7 @@ function isObjectLike(value) {
 module.exports = flatten;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],111:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 (function (Buffer){
 
 exports.compare = function (a, b) {
@@ -15577,7 +16074,7 @@ exports.filter = function (range, compare) {
 
 
 }).call(this,{"isBuffer":require("../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js")})
-},{"../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":9}],112:[function(require,module,exports){
+},{"../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":9}],117:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 var inherits = require('inherits')
@@ -15726,7 +16223,7 @@ function fnI (a, b, c, d, m, k, s) {
 module.exports = MD5
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":4,"hash-base":76,"inherits":78}],113:[function(require,module,exports){
+},{"buffer":4,"hash-base":79,"inherits":83}],118:[function(require,module,exports){
 /*!
  * micromatch <https://github.com/jonschlinkert/micromatch>
  *
@@ -16159,7 +16656,7 @@ micromatch.matchKeys = matchKeys;
 
 module.exports = micromatch;
 
-},{"./lib/expand":115,"./lib/utils":117}],114:[function(require,module,exports){
+},{"./lib/expand":120,"./lib/utils":122}],119:[function(require,module,exports){
 'use strict';
 
 var chars = {}, unesc, temp;
@@ -16228,7 +16725,7 @@ chars.TEMP = temp || (temp = reverse(chars.ESC_TEMP));
 
 module.exports = chars;
 
-},{}],115:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 /*!
  * micromatch <https://github.com/jonschlinkert/micromatch>
  *
@@ -16534,7 +17031,7 @@ function globstar(dotfile) {
   return '(?:(?!(?:\\/|^)\\.).)*?';
 }
 
-},{"./glob":116,"./utils":117}],116:[function(require,module,exports){
+},{"./glob":121,"./utils":122}],121:[function(require,module,exports){
 'use strict';
 
 var chars = require('./chars');
@@ -16729,7 +17226,7 @@ function unesc(str) {
   return str;
 }
 
-},{"./chars":114,"./utils":117}],117:[function(require,module,exports){
+},{"./chars":119,"./utils":122}],122:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -16882,7 +17379,7 @@ utils.escapeRe = function escapeRe(str) {
 module.exports = utils;
 
 }).call(this,require('_process'))
-},{"_process":13,"arr-diff":49,"array-unique":51,"braces":55,"expand-brackets":67,"extglob":69,"filename-regex":70,"is-extglob":83,"is-glob":84,"kind-of":91,"normalize-path":120,"object.omit":125,"parse-glob":126,"path":11,"regex-cache":150}],118:[function(require,module,exports){
+},{"_process":13,"arr-diff":49,"array-unique":51,"braces":56,"expand-brackets":68,"extglob":70,"filename-regex":71,"is-extglob":88,"is-glob":89,"kind-of":96,"normalize-path":127,"object.omit":132,"parse-glob":134,"path":11,"regex-cache":158}],123:[function(require,module,exports){
 var Time = require('monotonic-timestamp')
 module.exports = function() {
   var timeStr = Time().toString(36)
@@ -16891,7 +17388,7 @@ module.exports = function() {
   return timeStr
 }
 
-},{"monotonic-timestamp":119}],119:[function(require,module,exports){
+},{"monotonic-timestamp":124}],124:[function(require,module,exports){
 // If `Date.now()` is invoked twice quickly, it's possible to get two
 // identical time stamps. To avoid generation duplications, subsequent
 // calls are manually ordered to force uniqueness.
@@ -16938,7 +17435,715 @@ function timestamp() {
   return adjusted
 }
 
-},{}],120:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
+'use strict';
+
+var range; // Create a range object for efficently rendering strings to elements.
+var NS_XHTML = 'http://www.w3.org/1999/xhtml';
+
+var doc = typeof document === 'undefined' ? undefined : document;
+
+var testEl = doc ?
+    doc.body || doc.createElement('div') :
+    {};
+
+// Fixes <https://github.com/patrick-steele-idem/morphdom/issues/32>
+// (IE7+ support) <=IE7 does not support el.hasAttribute(name)
+var actualHasAttributeNS;
+
+if (testEl.hasAttributeNS) {
+    actualHasAttributeNS = function(el, namespaceURI, name) {
+        return el.hasAttributeNS(namespaceURI, name);
+    };
+} else if (testEl.hasAttribute) {
+    actualHasAttributeNS = function(el, namespaceURI, name) {
+        return el.hasAttribute(name);
+    };
+} else {
+    actualHasAttributeNS = function(el, namespaceURI, name) {
+        return el.getAttributeNode(namespaceURI, name) != null;
+    };
+}
+
+var hasAttributeNS = actualHasAttributeNS;
+
+
+function toElement(str) {
+    if (!range && doc.createRange) {
+        range = doc.createRange();
+        range.selectNode(doc.body);
+    }
+
+    var fragment;
+    if (range && range.createContextualFragment) {
+        fragment = range.createContextualFragment(str);
+    } else {
+        fragment = doc.createElement('body');
+        fragment.innerHTML = str;
+    }
+    return fragment.childNodes[0];
+}
+
+/**
+ * Returns true if two node's names are the same.
+ *
+ * NOTE: We don't bother checking `namespaceURI` because you will never find two HTML elements with the same
+ *       nodeName and different namespace URIs.
+ *
+ * @param {Element} a
+ * @param {Element} b The target element
+ * @return {boolean}
+ */
+function compareNodeNames(fromEl, toEl) {
+    var fromNodeName = fromEl.nodeName;
+    var toNodeName = toEl.nodeName;
+
+    if (fromNodeName === toNodeName) {
+        return true;
+    }
+
+    if (toEl.actualize &&
+        fromNodeName.charCodeAt(0) < 91 && /* from tag name is upper case */
+        toNodeName.charCodeAt(0) > 90 /* target tag name is lower case */) {
+        // If the target element is a virtual DOM node then we may need to normalize the tag name
+        // before comparing. Normal HTML elements that are in the "http://www.w3.org/1999/xhtml"
+        // are converted to upper case
+        return fromNodeName === toNodeName.toUpperCase();
+    } else {
+        return false;
+    }
+}
+
+/**
+ * Create an element, optionally with a known namespace URI.
+ *
+ * @param {string} name the element name, e.g. 'div' or 'svg'
+ * @param {string} [namespaceURI] the element's namespace URI, i.e. the value of
+ * its `xmlns` attribute or its inferred namespace.
+ *
+ * @return {Element}
+ */
+function createElementNS(name, namespaceURI) {
+    return !namespaceURI || namespaceURI === NS_XHTML ?
+        doc.createElement(name) :
+        doc.createElementNS(namespaceURI, name);
+}
+
+/**
+ * Copies the children of one DOM element to another DOM element
+ */
+function moveChildren(fromEl, toEl) {
+    var curChild = fromEl.firstChild;
+    while (curChild) {
+        var nextChild = curChild.nextSibling;
+        toEl.appendChild(curChild);
+        curChild = nextChild;
+    }
+    return toEl;
+}
+
+function morphAttrs(fromNode, toNode) {
+    var attrs = toNode.attributes;
+    var i;
+    var attr;
+    var attrName;
+    var attrNamespaceURI;
+    var attrValue;
+    var fromValue;
+
+    for (i = attrs.length - 1; i >= 0; --i) {
+        attr = attrs[i];
+        attrName = attr.name;
+        attrNamespaceURI = attr.namespaceURI;
+        attrValue = attr.value;
+
+        if (attrNamespaceURI) {
+            attrName = attr.localName || attrName;
+            fromValue = fromNode.getAttributeNS(attrNamespaceURI, attrName);
+
+            if (fromValue !== attrValue) {
+                fromNode.setAttributeNS(attrNamespaceURI, attrName, attrValue);
+            }
+        } else {
+            fromValue = fromNode.getAttribute(attrName);
+
+            if (fromValue !== attrValue) {
+                fromNode.setAttribute(attrName, attrValue);
+            }
+        }
+    }
+
+    // Remove any extra attributes found on the original DOM element that
+    // weren't found on the target element.
+    attrs = fromNode.attributes;
+
+    for (i = attrs.length - 1; i >= 0; --i) {
+        attr = attrs[i];
+        if (attr.specified !== false) {
+            attrName = attr.name;
+            attrNamespaceURI = attr.namespaceURI;
+
+            if (attrNamespaceURI) {
+                attrName = attr.localName || attrName;
+
+                if (!hasAttributeNS(toNode, attrNamespaceURI, attrName)) {
+                    fromNode.removeAttributeNS(attrNamespaceURI, attrName);
+                }
+            } else {
+                if (!hasAttributeNS(toNode, null, attrName)) {
+                    fromNode.removeAttribute(attrName);
+                }
+            }
+        }
+    }
+}
+
+function syncBooleanAttrProp(fromEl, toEl, name) {
+    if (fromEl[name] !== toEl[name]) {
+        fromEl[name] = toEl[name];
+        if (fromEl[name]) {
+            fromEl.setAttribute(name, '');
+        } else {
+            fromEl.removeAttribute(name, '');
+        }
+    }
+}
+
+var specialElHandlers = {
+    /**
+     * Needed for IE. Apparently IE doesn't think that "selected" is an
+     * attribute when reading over the attributes using selectEl.attributes
+     */
+    OPTION: function(fromEl, toEl) {
+        syncBooleanAttrProp(fromEl, toEl, 'selected');
+    },
+    /**
+     * The "value" attribute is special for the <input> element since it sets
+     * the initial value. Changing the "value" attribute without changing the
+     * "value" property will have no effect since it is only used to the set the
+     * initial value.  Similar for the "checked" attribute, and "disabled".
+     */
+    INPUT: function(fromEl, toEl) {
+        syncBooleanAttrProp(fromEl, toEl, 'checked');
+        syncBooleanAttrProp(fromEl, toEl, 'disabled');
+
+        if (fromEl.value !== toEl.value) {
+            fromEl.value = toEl.value;
+        }
+
+        if (!hasAttributeNS(toEl, null, 'value')) {
+            fromEl.removeAttribute('value');
+        }
+    },
+
+    TEXTAREA: function(fromEl, toEl) {
+        var newValue = toEl.value;
+        if (fromEl.value !== newValue) {
+            fromEl.value = newValue;
+        }
+
+        var firstChild = fromEl.firstChild;
+        if (firstChild) {
+            // Needed for IE. Apparently IE sets the placeholder as the
+            // node value and vise versa. This ignores an empty update.
+            var oldValue = firstChild.nodeValue;
+
+            if (oldValue == newValue || (!newValue && oldValue == fromEl.placeholder)) {
+                return;
+            }
+
+            firstChild.nodeValue = newValue;
+        }
+    },
+    SELECT: function(fromEl, toEl) {
+        if (!hasAttributeNS(toEl, null, 'multiple')) {
+            var selectedIndex = -1;
+            var i = 0;
+            var curChild = toEl.firstChild;
+            while(curChild) {
+                var nodeName = curChild.nodeName;
+                if (nodeName && nodeName.toUpperCase() === 'OPTION') {
+                    if (hasAttributeNS(curChild, null, 'selected')) {
+                        selectedIndex = i;
+                        break;
+                    }
+                    i++;
+                }
+                curChild = curChild.nextSibling;
+            }
+
+            fromEl.selectedIndex = i;
+        }
+    }
+};
+
+var ELEMENT_NODE = 1;
+var TEXT_NODE = 3;
+var COMMENT_NODE = 8;
+
+function noop() {}
+
+function defaultGetNodeKey(node) {
+    return node.id;
+}
+
+function morphdomFactory(morphAttrs) {
+
+    return function morphdom(fromNode, toNode, options) {
+        if (!options) {
+            options = {};
+        }
+
+        if (typeof toNode === 'string') {
+            if (fromNode.nodeName === '#document' || fromNode.nodeName === 'HTML') {
+                var toNodeHtml = toNode;
+                toNode = doc.createElement('html');
+                toNode.innerHTML = toNodeHtml;
+            } else {
+                toNode = toElement(toNode);
+            }
+        }
+
+        var getNodeKey = options.getNodeKey || defaultGetNodeKey;
+        var onBeforeNodeAdded = options.onBeforeNodeAdded || noop;
+        var onNodeAdded = options.onNodeAdded || noop;
+        var onBeforeElUpdated = options.onBeforeElUpdated || noop;
+        var onElUpdated = options.onElUpdated || noop;
+        var onBeforeNodeDiscarded = options.onBeforeNodeDiscarded || noop;
+        var onNodeDiscarded = options.onNodeDiscarded || noop;
+        var onBeforeElChildrenUpdated = options.onBeforeElChildrenUpdated || noop;
+        var childrenOnly = options.childrenOnly === true;
+
+        // This object is used as a lookup to quickly find all keyed elements in the original DOM tree.
+        var fromNodesLookup = {};
+        var keyedRemovalList;
+
+        function addKeyedRemoval(key) {
+            if (keyedRemovalList) {
+                keyedRemovalList.push(key);
+            } else {
+                keyedRemovalList = [key];
+            }
+        }
+
+        function walkDiscardedChildNodes(node, skipKeyedNodes) {
+            if (node.nodeType === ELEMENT_NODE) {
+                var curChild = node.firstChild;
+                while (curChild) {
+
+                    var key = undefined;
+
+                    if (skipKeyedNodes && (key = getNodeKey(curChild))) {
+                        // If we are skipping keyed nodes then we add the key
+                        // to a list so that it can be handled at the very end.
+                        addKeyedRemoval(key);
+                    } else {
+                        // Only report the node as discarded if it is not keyed. We do this because
+                        // at the end we loop through all keyed elements that were unmatched
+                        // and then discard them in one final pass.
+                        onNodeDiscarded(curChild);
+                        if (curChild.firstChild) {
+                            walkDiscardedChildNodes(curChild, skipKeyedNodes);
+                        }
+                    }
+
+                    curChild = curChild.nextSibling;
+                }
+            }
+        }
+
+        /**
+         * Removes a DOM node out of the original DOM
+         *
+         * @param  {Node} node The node to remove
+         * @param  {Node} parentNode The nodes parent
+         * @param  {Boolean} skipKeyedNodes If true then elements with keys will be skipped and not discarded.
+         * @return {undefined}
+         */
+        function removeNode(node, parentNode, skipKeyedNodes) {
+            if (onBeforeNodeDiscarded(node) === false) {
+                return;
+            }
+
+            if (parentNode) {
+                parentNode.removeChild(node);
+            }
+
+            onNodeDiscarded(node);
+            walkDiscardedChildNodes(node, skipKeyedNodes);
+        }
+
+        // // TreeWalker implementation is no faster, but keeping this around in case this changes in the future
+        // function indexTree(root) {
+        //     var treeWalker = document.createTreeWalker(
+        //         root,
+        //         NodeFilter.SHOW_ELEMENT);
+        //
+        //     var el;
+        //     while((el = treeWalker.nextNode())) {
+        //         var key = getNodeKey(el);
+        //         if (key) {
+        //             fromNodesLookup[key] = el;
+        //         }
+        //     }
+        // }
+
+        // // NodeIterator implementation is no faster, but keeping this around in case this changes in the future
+        //
+        // function indexTree(node) {
+        //     var nodeIterator = document.createNodeIterator(node, NodeFilter.SHOW_ELEMENT);
+        //     var el;
+        //     while((el = nodeIterator.nextNode())) {
+        //         var key = getNodeKey(el);
+        //         if (key) {
+        //             fromNodesLookup[key] = el;
+        //         }
+        //     }
+        // }
+
+        function indexTree(node) {
+            if (node.nodeType === ELEMENT_NODE) {
+                var curChild = node.firstChild;
+                while (curChild) {
+                    var key = getNodeKey(curChild);
+                    if (key) {
+                        fromNodesLookup[key] = curChild;
+                    }
+
+                    // Walk recursively
+                    indexTree(curChild);
+
+                    curChild = curChild.nextSibling;
+                }
+            }
+        }
+
+        indexTree(fromNode);
+
+        function handleNodeAdded(el) {
+            onNodeAdded(el);
+
+            var curChild = el.firstChild;
+            while (curChild) {
+                var nextSibling = curChild.nextSibling;
+
+                var key = getNodeKey(curChild);
+                if (key) {
+                    var unmatchedFromEl = fromNodesLookup[key];
+                    if (unmatchedFromEl && compareNodeNames(curChild, unmatchedFromEl)) {
+                        curChild.parentNode.replaceChild(unmatchedFromEl, curChild);
+                        morphEl(unmatchedFromEl, curChild);
+                    }
+                }
+
+                handleNodeAdded(curChild);
+                curChild = nextSibling;
+            }
+        }
+
+        function morphEl(fromEl, toEl, childrenOnly) {
+            var toElKey = getNodeKey(toEl);
+            var curFromNodeKey;
+
+            if (toElKey) {
+                // If an element with an ID is being morphed then it is will be in the final
+                // DOM so clear it out of the saved elements collection
+                delete fromNodesLookup[toElKey];
+            }
+
+            if (toNode.isSameNode && toNode.isSameNode(fromNode)) {
+                return;
+            }
+
+            if (!childrenOnly) {
+                if (onBeforeElUpdated(fromEl, toEl) === false) {
+                    return;
+                }
+
+                morphAttrs(fromEl, toEl);
+                onElUpdated(fromEl);
+
+                if (onBeforeElChildrenUpdated(fromEl, toEl) === false) {
+                    return;
+                }
+            }
+
+            if (fromEl.nodeName !== 'TEXTAREA') {
+                var curToNodeChild = toEl.firstChild;
+                var curFromNodeChild = fromEl.firstChild;
+                var curToNodeKey;
+
+                var fromNextSibling;
+                var toNextSibling;
+                var matchingFromEl;
+
+                outer: while (curToNodeChild) {
+                    toNextSibling = curToNodeChild.nextSibling;
+                    curToNodeKey = getNodeKey(curToNodeChild);
+
+                    while (curFromNodeChild) {
+                        fromNextSibling = curFromNodeChild.nextSibling;
+
+                        if (curToNodeChild.isSameNode && curToNodeChild.isSameNode(curFromNodeChild)) {
+                            curToNodeChild = toNextSibling;
+                            curFromNodeChild = fromNextSibling;
+                            continue outer;
+                        }
+
+                        curFromNodeKey = getNodeKey(curFromNodeChild);
+
+                        var curFromNodeType = curFromNodeChild.nodeType;
+
+                        var isCompatible = undefined;
+
+                        if (curFromNodeType === curToNodeChild.nodeType) {
+                            if (curFromNodeType === ELEMENT_NODE) {
+                                // Both nodes being compared are Element nodes
+
+                                if (curToNodeKey) {
+                                    // The target node has a key so we want to match it up with the correct element
+                                    // in the original DOM tree
+                                    if (curToNodeKey !== curFromNodeKey) {
+                                        // The current element in the original DOM tree does not have a matching key so
+                                        // let's check our lookup to see if there is a matching element in the original
+                                        // DOM tree
+                                        if ((matchingFromEl = fromNodesLookup[curToNodeKey])) {
+                                            if (curFromNodeChild.nextSibling === matchingFromEl) {
+                                                // Special case for single element removals. To avoid removing the original
+                                                // DOM node out of the tree (since that can break CSS transitions, etc.),
+                                                // we will instead discard the current node and wait until the next
+                                                // iteration to properly match up the keyed target element with its matching
+                                                // element in the original tree
+                                                isCompatible = false;
+                                            } else {
+                                                // We found a matching keyed element somewhere in the original DOM tree.
+                                                // Let's moving the original DOM node into the current position and morph
+                                                // it.
+
+                                                // NOTE: We use insertBefore instead of replaceChild because we want to go through
+                                                // the `removeNode()` function for the node that is being discarded so that
+                                                // all lifecycle hooks are correctly invoked
+                                                fromEl.insertBefore(matchingFromEl, curFromNodeChild);
+
+                                                fromNextSibling = curFromNodeChild.nextSibling;
+
+                                                if (curFromNodeKey) {
+                                                    // Since the node is keyed it might be matched up later so we defer
+                                                    // the actual removal to later
+                                                    addKeyedRemoval(curFromNodeKey);
+                                                } else {
+                                                    // NOTE: we skip nested keyed nodes from being removed since there is
+                                                    //       still a chance they will be matched up later
+                                                    removeNode(curFromNodeChild, fromEl, true /* skip keyed nodes */);
+                                                }
+
+                                                curFromNodeChild = matchingFromEl;
+                                            }
+                                        } else {
+                                            // The nodes are not compatible since the "to" node has a key and there
+                                            // is no matching keyed node in the source tree
+                                            isCompatible = false;
+                                        }
+                                    }
+                                } else if (curFromNodeKey) {
+                                    // The original has a key
+                                    isCompatible = false;
+                                }
+
+                                isCompatible = isCompatible !== false && compareNodeNames(curFromNodeChild, curToNodeChild);
+                                if (isCompatible) {
+                                    // We found compatible DOM elements so transform
+                                    // the current "from" node to match the current
+                                    // target DOM node.
+                                    morphEl(curFromNodeChild, curToNodeChild);
+                                }
+
+                            } else if (curFromNodeType === TEXT_NODE || curFromNodeType == COMMENT_NODE) {
+                                // Both nodes being compared are Text or Comment nodes
+                                isCompatible = true;
+                                // Simply update nodeValue on the original node to
+                                // change the text value
+                                if (curFromNodeChild.nodeValue !== curToNodeChild.nodeValue) {
+                                    curFromNodeChild.nodeValue = curToNodeChild.nodeValue;
+                                }
+
+                            }
+                        }
+
+                        if (isCompatible) {
+                            // Advance both the "to" child and the "from" child since we found a match
+                            curToNodeChild = toNextSibling;
+                            curFromNodeChild = fromNextSibling;
+                            continue outer;
+                        }
+
+                        // No compatible match so remove the old node from the DOM and continue trying to find a
+                        // match in the original DOM. However, we only do this if the from node is not keyed
+                        // since it is possible that a keyed node might match up with a node somewhere else in the
+                        // target tree and we don't want to discard it just yet since it still might find a
+                        // home in the final DOM tree. After everything is done we will remove any keyed nodes
+                        // that didn't find a home
+                        if (curFromNodeKey) {
+                            // Since the node is keyed it might be matched up later so we defer
+                            // the actual removal to later
+                            addKeyedRemoval(curFromNodeKey);
+                        } else {
+                            // NOTE: we skip nested keyed nodes from being removed since there is
+                            //       still a chance they will be matched up later
+                            removeNode(curFromNodeChild, fromEl, true /* skip keyed nodes */);
+                        }
+
+                        curFromNodeChild = fromNextSibling;
+                    }
+
+                    // If we got this far then we did not find a candidate match for
+                    // our "to node" and we exhausted all of the children "from"
+                    // nodes. Therefore, we will just append the current "to" node
+                    // to the end
+                    if (curToNodeKey && (matchingFromEl = fromNodesLookup[curToNodeKey]) && compareNodeNames(matchingFromEl, curToNodeChild)) {
+                        fromEl.appendChild(matchingFromEl);
+                        morphEl(matchingFromEl, curToNodeChild);
+                    } else {
+                        var onBeforeNodeAddedResult = onBeforeNodeAdded(curToNodeChild);
+                        if (onBeforeNodeAddedResult !== false) {
+                            if (onBeforeNodeAddedResult) {
+                                curToNodeChild = onBeforeNodeAddedResult;
+                            }
+
+                            if (curToNodeChild.actualize) {
+                                curToNodeChild = curToNodeChild.actualize(fromEl.ownerDocument || doc);
+                            }
+                            fromEl.appendChild(curToNodeChild);
+                            handleNodeAdded(curToNodeChild);
+                        }
+                    }
+
+                    curToNodeChild = toNextSibling;
+                    curFromNodeChild = fromNextSibling;
+                }
+
+                // We have processed all of the "to nodes". If curFromNodeChild is
+                // non-null then we still have some from nodes left over that need
+                // to be removed
+                while (curFromNodeChild) {
+                    fromNextSibling = curFromNodeChild.nextSibling;
+                    if ((curFromNodeKey = getNodeKey(curFromNodeChild))) {
+                        // Since the node is keyed it might be matched up later so we defer
+                        // the actual removal to later
+                        addKeyedRemoval(curFromNodeKey);
+                    } else {
+                        // NOTE: we skip nested keyed nodes from being removed since there is
+                        //       still a chance they will be matched up later
+                        removeNode(curFromNodeChild, fromEl, true /* skip keyed nodes */);
+                    }
+                    curFromNodeChild = fromNextSibling;
+                }
+            }
+
+            var specialElHandler = specialElHandlers[fromEl.nodeName];
+            if (specialElHandler) {
+                specialElHandler(fromEl, toEl);
+            }
+        } // END: morphEl(...)
+
+        var morphedNode = fromNode;
+        var morphedNodeType = morphedNode.nodeType;
+        var toNodeType = toNode.nodeType;
+
+        if (!childrenOnly) {
+            // Handle the case where we are given two DOM nodes that are not
+            // compatible (e.g. <div> --> <span> or <div> --> TEXT)
+            if (morphedNodeType === ELEMENT_NODE) {
+                if (toNodeType === ELEMENT_NODE) {
+                    if (!compareNodeNames(fromNode, toNode)) {
+                        onNodeDiscarded(fromNode);
+                        morphedNode = moveChildren(fromNode, createElementNS(toNode.nodeName, toNode.namespaceURI));
+                    }
+                } else {
+                    // Going from an element node to a text node
+                    morphedNode = toNode;
+                }
+            } else if (morphedNodeType === TEXT_NODE || morphedNodeType === COMMENT_NODE) { // Text or comment node
+                if (toNodeType === morphedNodeType) {
+                    if (morphedNode.nodeValue !== toNode.nodeValue) {
+                        morphedNode.nodeValue = toNode.nodeValue;
+                    }
+
+                    return morphedNode;
+                } else {
+                    // Text node to something else
+                    morphedNode = toNode;
+                }
+            }
+        }
+
+        if (morphedNode === toNode) {
+            // The "to node" was not compatible with the "from node" so we had to
+            // toss out the "from node" and use the "to node"
+            onNodeDiscarded(fromNode);
+        } else {
+            morphEl(morphedNode, toNode, childrenOnly);
+
+            // We now need to loop over any keyed nodes that might need to be
+            // removed. We only do the removal if we know that the keyed node
+            // never found a match. When a keyed node is matched up we remove
+            // it out of fromNodesLookup and we use fromNodesLookup to determine
+            // if a keyed node has been matched up or not
+            if (keyedRemovalList) {
+                for (var i=0, len=keyedRemovalList.length; i<len; i++) {
+                    var elToRemove = fromNodesLookup[keyedRemovalList[i]];
+                    if (elToRemove) {
+                        removeNode(elToRemove, elToRemove.parentNode, false);
+                    }
+                }
+            }
+        }
+
+        if (!childrenOnly && morphedNode !== fromNode && fromNode.parentNode) {
+            if (morphedNode.actualize) {
+                morphedNode = morphedNode.actualize(fromNode.ownerDocument || doc);
+            }
+            // If we had to swap out the from node with a new node because the old
+            // node was not compatible with the target node then we need to
+            // replace the old DOM node in the original DOM tree. This is only
+            // possible if the original DOM node was part of a DOM tree which
+            // we know is the case if it has a parent node.
+            fromNode.parentNode.replaceChild(morphedNode, fromNode);
+        }
+
+        return morphedNode;
+    };
+}
+
+var morphdom = morphdomFactory(morphAttrs);
+
+module.exports = morphdom;
+
+},{}],126:[function(require,module,exports){
+assert.notEqual = notEqual
+assert.notOk = notOk
+assert.equal = equal
+assert.ok = assert
+
+module.exports = assert
+
+function equal (a, b, m) {
+  assert(a == b, m) // eslint-disable-line eqeqeq
+}
+
+function notEqual (a, b, m) {
+  assert(a != b, m) // eslint-disable-line eqeqeq
+}
+
+function notOk (t, m) {
+  assert(!t, m)
+}
+
+function assert (t, m) {
+  if (!t) throw new Error(m || 'AssertionError')
+}
+
+},{}],127:[function(require,module,exports){
 /*!
  * normalize-path <https://github.com/jonschlinkert/normalize-path>
  *
@@ -16959,7 +18164,7 @@ module.exports = function normalizePath(str, stripTrailing) {
   return str;
 };
 
-},{"remove-trailing-separator":151}],121:[function(require,module,exports){
+},{"remove-trailing-separator":159}],128:[function(require,module,exports){
 var hasOwn = Object.prototype.hasOwnProperty;
 var toString = Object.prototype.toString;
 
@@ -17001,11 +18206,11 @@ module.exports = function forEach(obj, fn) {
 };
 
 
-},{}],122:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 module.exports = Object.keys || require('./shim');
 
 
-},{"./shim":124}],123:[function(require,module,exports){
+},{"./shim":131}],130:[function(require,module,exports){
 var toString = Object.prototype.toString;
 
 module.exports = function isArguments(value) {
@@ -17023,7 +18228,7 @@ module.exports = function isArguments(value) {
 };
 
 
-},{}],124:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 (function () {
 	"use strict";
 
@@ -17087,7 +18292,7 @@ module.exports = function isArguments(value) {
 }());
 
 
-},{"./foreach":121,"./isArguments":123}],125:[function(require,module,exports){
+},{"./foreach":128,"./isArguments":130}],132:[function(require,module,exports){
 /*!
  * object.omit <https://github.com/jonschlinkert/object.omit>
  *
@@ -17129,7 +18334,111 @@ module.exports = function omit(obj, keys) {
   return res;
 };
 
-},{"for-own":73,"is-extendable":82}],126:[function(require,module,exports){
+},{"for-own":74,"is-extendable":87}],133:[function(require,module,exports){
+/* global MutationObserver */
+var document = require('global/document')
+var window = require('global/window')
+var assert = require('assert')
+var watch = Object.create(null)
+var KEY_ID = 'onloadid' + (new Date() % 9e6).toString(36)
+var KEY_ATTR = 'data-' + KEY_ID
+var INDEX = 0
+
+if (window && window.MutationObserver) {
+  var observer = new MutationObserver(function (mutations) {
+    if (Object.keys(watch).length < 1) return
+    for (var i = 0; i < mutations.length; i++) {
+      if (mutations[i].attributeName === KEY_ATTR) {
+        eachAttr(mutations[i], turnon, turnoff)
+        continue
+      }
+      eachMutation(mutations[i].removedNodes, turnoff)
+      eachMutation(mutations[i].addedNodes, turnon)
+    }
+  })
+  if (document.body) {
+    beginObserve(observer)
+  } else {
+    document.addEventListener('DOMContentLoaded', function (event) {
+      beginObserve(observer)
+    })
+  }
+}
+
+function beginObserve (observer) {
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeOldValue: true,
+    attributeFilter: [KEY_ATTR]
+  })
+}
+
+module.exports = function onload (el, on, off, caller) {
+  assert(document.body, 'on-load: will not work prior to DOMContentLoaded')
+  on = on || function () {}
+  off = off || function () {}
+  el.setAttribute(KEY_ATTR, 'o' + INDEX)
+  watch['o' + INDEX] = [on, off, 0, caller || onload.caller]
+  INDEX += 1
+  return el
+}
+
+module.exports.KEY_ATTR = KEY_ATTR
+module.exports.KEY_ID = KEY_ID
+
+function turnon (index, el) {
+  if (watch[index][0] && watch[index][2] === 0) {
+    watch[index][0](el)
+    watch[index][2] = 1
+  }
+}
+
+function turnoff (index, el) {
+  if (watch[index][1] && watch[index][2] === 1) {
+    watch[index][1](el)
+    watch[index][2] = 0
+  }
+}
+
+function eachAttr (mutation, on, off) {
+  var newValue = mutation.target.getAttribute(KEY_ATTR)
+  if (sameOrigin(mutation.oldValue, newValue)) {
+    watch[newValue] = watch[mutation.oldValue]
+    return
+  }
+  if (watch[mutation.oldValue]) {
+    off(mutation.oldValue, mutation.target)
+  }
+  if (watch[newValue]) {
+    on(newValue, mutation.target)
+  }
+}
+
+function sameOrigin (oldValue, newValue) {
+  if (!oldValue || !newValue) return false
+  return watch[oldValue][3] === watch[newValue][3]
+}
+
+function eachMutation (nodes, fn) {
+  var keys = Object.keys(watch)
+  for (var i = 0; i < nodes.length; i++) {
+    if (nodes[i] && nodes[i].getAttribute && nodes[i].getAttribute(KEY_ATTR)) {
+      var onloadid = nodes[i].getAttribute(KEY_ATTR)
+      keys.forEach(function (k) {
+        if (onloadid === k) {
+          fn(k, nodes[i])
+        }
+      })
+    }
+    if (nodes[i].childNodes.length > 0) {
+      eachMutation(nodes[i].childNodes, fn)
+    }
+  }
+}
+
+},{"assert":126,"global/document":77,"global/window":78}],134:[function(require,module,exports){
 /*!
  * parse-glob <https://github.com/jonschlinkert/parse-glob>
  *
@@ -17287,7 +18596,7 @@ function unescape(str) {
   return str;
 }
 
-},{"glob-base":74,"is-dotfile":80,"is-extglob":83,"is-glob":84}],127:[function(require,module,exports){
+},{"glob-base":75,"is-dotfile":85,"is-extglob":88,"is-glob":89}],135:[function(require,module,exports){
 /*!
  * preserve <https://github.com/jonschlinkert/preserve>
  *
@@ -17342,14 +18651,14 @@ function randomize() {
 }
 
 var cache = {};
-},{}],128:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"_process":13,"dup":12}],129:[function(require,module,exports){
+},{"_process":13,"dup":12}],137:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./lib')
 
-},{"./lib":134}],130:[function(require,module,exports){
+},{"./lib":142}],138:[function(require,module,exports){
 'use strict';
 
 var asap = require('asap/raw');
@@ -17564,7 +18873,7 @@ function doResolve(fn, promise) {
   }
 }
 
-},{"asap/raw":53}],131:[function(require,module,exports){
+},{"asap/raw":53}],139:[function(require,module,exports){
 'use strict';
 
 var Promise = require('./core.js');
@@ -17579,7 +18888,7 @@ Promise.prototype.done = function (onFulfilled, onRejected) {
   });
 };
 
-},{"./core.js":130}],132:[function(require,module,exports){
+},{"./core.js":138}],140:[function(require,module,exports){
 'use strict';
 
 //This file contains the ES6 extensions to the core Promises/A+ API
@@ -17688,7 +18997,7 @@ Promise.prototype['catch'] = function (onRejected) {
   return this.then(null, onRejected);
 };
 
-},{"./core.js":130}],133:[function(require,module,exports){
+},{"./core.js":138}],141:[function(require,module,exports){
 'use strict';
 
 var Promise = require('./core.js');
@@ -17706,7 +19015,7 @@ Promise.prototype['finally'] = function (f) {
   });
 };
 
-},{"./core.js":130}],134:[function(require,module,exports){
+},{"./core.js":138}],142:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./core.js');
@@ -17716,7 +19025,7 @@ require('./es6-extensions.js');
 require('./node-extensions.js');
 require('./synchronous.js');
 
-},{"./core.js":130,"./done.js":131,"./es6-extensions.js":132,"./finally.js":133,"./node-extensions.js":135,"./synchronous.js":136}],135:[function(require,module,exports){
+},{"./core.js":138,"./done.js":139,"./es6-extensions.js":140,"./finally.js":141,"./node-extensions.js":143,"./synchronous.js":144}],143:[function(require,module,exports){
 'use strict';
 
 // This file contains then/promise specific extensions that are only useful
@@ -17848,7 +19157,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
   });
 };
 
-},{"./core.js":130,"asap":52}],136:[function(require,module,exports){
+},{"./core.js":138,"asap":52}],144:[function(require,module,exports){
 'use strict';
 
 var Promise = require('./core.js');
@@ -17912,7 +19221,7 @@ Promise.disableSynchronous = function() {
   Promise.prototype.getState = undefined;
 };
 
-},{"./core.js":130}],137:[function(require,module,exports){
+},{"./core.js":138}],145:[function(require,module,exports){
 /*!
   * prr
   * (c) 2013 Rod Vagg <rod@vagg.org>
@@ -17976,7 +19285,7 @@ Promise.disableSynchronous = function() {
 
   return prr
 })
-},{}],138:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 'use strict';
 
 var has = Object.prototype.hasOwnProperty;
@@ -18050,7 +19359,7 @@ function querystringify(obj, prefix) {
 exports.stringify = querystringify;
 exports.parse = querystring;
 
-},{}],139:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 /*!
  * randomatic <https://github.com/jonschlinkert/randomatic>
  *
@@ -18134,7 +19443,7 @@ function randomatic(pattern, length, options) {
   return res;
 };
 
-},{"is-number":140,"kind-of":142}],140:[function(require,module,exports){
+},{"is-number":148,"kind-of":150}],148:[function(require,module,exports){
 /*!
  * is-number <https://github.com/jonschlinkert/is-number>
  *
@@ -18158,9 +19467,9 @@ module.exports = function isNumber(num) {
   return (num - num + 1) >= 0;
 };
 
-},{"kind-of":141}],141:[function(require,module,exports){
-arguments[4][91][0].apply(exports,arguments)
-},{"dup":91,"is-buffer":79}],142:[function(require,module,exports){
+},{"kind-of":149}],149:[function(require,module,exports){
+arguments[4][96][0].apply(exports,arguments)
+},{"dup":96,"is-buffer":84}],150:[function(require,module,exports){
 var isBuffer = require('is-buffer');
 var toString = Object.prototype.toString;
 
@@ -18281,7 +19590,7 @@ module.exports = function kindOf(val) {
   return 'object';
 };
 
-},{"is-buffer":79}],143:[function(require,module,exports){
+},{"is-buffer":84}],151:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -18374,7 +19683,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_readable":145,"./_stream_writable":147,"_process":13,"core-util-is":56,"inherits":78}],144:[function(require,module,exports){
+},{"./_stream_readable":153,"./_stream_writable":155,"_process":13,"core-util-is":57,"inherits":83}],152:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -18422,7 +19731,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":146,"core-util-is":56,"inherits":78}],145:[function(require,module,exports){
+},{"./_stream_transform":154,"core-util-is":57,"inherits":83}],153:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -19377,7 +20686,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":143,"_process":13,"buffer":4,"core-util-is":56,"events":6,"inherits":78,"isarray":148,"stream":28,"string_decoder/":156,"util":3}],146:[function(require,module,exports){
+},{"./_stream_duplex":151,"_process":13,"buffer":4,"core-util-is":57,"events":6,"inherits":83,"isarray":156,"stream":28,"string_decoder/":164,"util":3}],154:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -19588,7 +20897,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":143,"core-util-is":56,"inherits":78}],147:[function(require,module,exports){
+},{"./_stream_duplex":151,"core-util-is":57,"inherits":83}],155:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -20069,12 +21378,12 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":143,"_process":13,"buffer":4,"core-util-is":56,"inherits":78,"stream":28}],148:[function(require,module,exports){
+},{"./_stream_duplex":151,"_process":13,"buffer":4,"core-util-is":57,"inherits":83,"stream":28}],156:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],149:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 (function (process){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = require('stream');
@@ -20088,7 +21397,7 @@ if (!process.browser && process.env.READABLE_STREAM === 'disable') {
 }
 
 }).call(this,require('_process'))
-},{"./lib/_stream_duplex.js":143,"./lib/_stream_passthrough.js":144,"./lib/_stream_readable.js":145,"./lib/_stream_transform.js":146,"./lib/_stream_writable.js":147,"_process":13,"stream":28}],150:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":151,"./lib/_stream_passthrough.js":152,"./lib/_stream_readable.js":153,"./lib/_stream_transform.js":154,"./lib/_stream_writable.js":155,"_process":13,"stream":28}],158:[function(require,module,exports){
 /*!
  * regex-cache <https://github.com/jonschlinkert/regex-cache>
  *
@@ -20158,7 +21467,7 @@ function memo(key, opts, regex) {
 module.exports.cache = cache;
 module.exports.basic = basic;
 
-},{"is-equal-shallow":81}],151:[function(require,module,exports){
+},{"is-equal-shallow":86}],159:[function(require,module,exports){
 (function (process){
 var isWin = process.platform === 'win32';
 
@@ -20179,7 +21488,7 @@ function isSeparator(str, i) {
 }
 
 }).call(this,require('_process'))
-},{"_process":13}],152:[function(require,module,exports){
+},{"_process":13}],160:[function(require,module,exports){
 /*!
  * repeat-element <https://github.com/jonschlinkert/repeat-element>
  *
@@ -20199,7 +21508,7 @@ module.exports = function repeat(ele, num) {
   return arr;
 };
 
-},{}],153:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 /*!
  * repeat-string <https://github.com/jonschlinkert/repeat-string>
  *
@@ -20271,7 +21580,7 @@ function repeat(str, num) {
   return res;
 }
 
-},{}],154:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 'use strict';
 
 /**
@@ -20311,9 +21620,9 @@ module.exports = function required(port, protocol) {
   return port !== 0;
 };
 
-},{}],155:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"buffer":4,"dup":27}],156:[function(require,module,exports){
+},{"buffer":4,"dup":27}],164:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20536,7 +21845,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":4}],157:[function(require,module,exports){
+},{"buffer":4}],165:[function(require,module,exports){
 var subdown = require('./leveldown')
 var levelup = require('levelup')
 
@@ -20551,7 +21860,7 @@ module.exports = function (db, prefix, opts) {
   return levelup(opts)
 }
 
-},{"./leveldown":158,"levelup":108}],158:[function(require,module,exports){
+},{"./leveldown":166,"levelup":113}],166:[function(require,module,exports){
 (function (Buffer){
 var util = require('util')
 var abstract = require('abstract-leveldown')
@@ -20719,39 +22028,39 @@ SubDown.prototype.iterator = function (opts) {
 module.exports = SubDown
 
 }).call(this,require("buffer").Buffer)
-},{"abstract-leveldown":162,"buffer":4,"level-option-wrap":103,"util":33}],159:[function(require,module,exports){
-arguments[4][59][0].apply(exports,arguments)
-},{"_process":13,"dup":59}],160:[function(require,module,exports){
+},{"abstract-leveldown":170,"buffer":4,"level-option-wrap":108,"util":33}],167:[function(require,module,exports){
 arguments[4][60][0].apply(exports,arguments)
-},{"_process":13,"dup":60}],161:[function(require,module,exports){
+},{"_process":13,"dup":60}],168:[function(require,module,exports){
 arguments[4][61][0].apply(exports,arguments)
-},{"../../../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":9,"./abstract-chained-batch":159,"./abstract-iterator":160,"_process":13,"dup":61,"xtend":179}],162:[function(require,module,exports){
+},{"_process":13,"dup":61}],169:[function(require,module,exports){
 arguments[4][62][0].apply(exports,arguments)
-},{"./abstract-chained-batch":159,"./abstract-iterator":160,"./abstract-leveldown":161,"./is-leveldown":163,"dup":62}],163:[function(require,module,exports){
+},{"../../../../../../../../.nvm/versions/node/v8.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":9,"./abstract-chained-batch":167,"./abstract-iterator":168,"_process":13,"dup":62,"xtend":187}],170:[function(require,module,exports){
 arguments[4][63][0].apply(exports,arguments)
-},{"./abstract-leveldown":161,"dup":63}],164:[function(require,module,exports){
+},{"./abstract-chained-batch":167,"./abstract-iterator":168,"./abstract-leveldown":169,"./is-leveldown":171,"dup":63}],171:[function(require,module,exports){
+arguments[4][64][0].apply(exports,arguments)
+},{"./abstract-leveldown":169,"dup":64}],172:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"./_stream_readable":166,"./_stream_writable":168,"core-util-is":56,"dup":15,"inherits":78,"process-nextick-args":128}],165:[function(require,module,exports){
+},{"./_stream_readable":174,"./_stream_writable":176,"core-util-is":57,"dup":15,"inherits":83,"process-nextick-args":136}],173:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"./_stream_transform":167,"core-util-is":56,"dup":16,"inherits":78}],166:[function(require,module,exports){
+},{"./_stream_transform":175,"core-util-is":57,"dup":16,"inherits":83}],174:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"./_stream_duplex":164,"./internal/streams/BufferList":169,"./internal/streams/destroy":170,"./internal/streams/stream":171,"_process":13,"core-util-is":56,"dup":17,"events":6,"inherits":78,"isarray":88,"process-nextick-args":128,"safe-buffer":155,"string_decoder/":174,"util":3}],167:[function(require,module,exports){
+},{"./_stream_duplex":172,"./internal/streams/BufferList":177,"./internal/streams/destroy":178,"./internal/streams/stream":179,"_process":13,"core-util-is":57,"dup":17,"events":6,"inherits":83,"isarray":93,"process-nextick-args":136,"safe-buffer":163,"string_decoder/":182,"util":3}],175:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"./_stream_duplex":164,"core-util-is":56,"dup":18,"inherits":78}],168:[function(require,module,exports){
+},{"./_stream_duplex":172,"core-util-is":57,"dup":18,"inherits":83}],176:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"./_stream_duplex":164,"./internal/streams/destroy":170,"./internal/streams/stream":171,"_process":13,"core-util-is":56,"dup":19,"inherits":78,"process-nextick-args":128,"safe-buffer":155,"util-deprecate":178}],169:[function(require,module,exports){
+},{"./_stream_duplex":172,"./internal/streams/destroy":178,"./internal/streams/stream":179,"_process":13,"core-util-is":57,"dup":19,"inherits":83,"process-nextick-args":136,"safe-buffer":163,"util-deprecate":186}],177:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20,"safe-buffer":155}],170:[function(require,module,exports){
+},{"dup":20,"safe-buffer":163}],178:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21,"process-nextick-args":128}],171:[function(require,module,exports){
+},{"dup":21,"process-nextick-args":136}],179:[function(require,module,exports){
 arguments[4][22][0].apply(exports,arguments)
-},{"dup":22,"events":6}],172:[function(require,module,exports){
+},{"dup":22,"events":6}],180:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./lib/_stream_duplex.js":164,"./lib/_stream_passthrough.js":165,"./lib/_stream_readable.js":166,"./lib/_stream_transform.js":167,"./lib/_stream_writable.js":168,"dup":24}],173:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":172,"./lib/_stream_passthrough.js":173,"./lib/_stream_readable.js":174,"./lib/_stream_transform.js":175,"./lib/_stream_writable.js":176,"dup":24}],181:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"./readable":172,"dup":25}],174:[function(require,module,exports){
+},{"./readable":180,"dup":25}],182:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29,"safe-buffer":155}],175:[function(require,module,exports){
+},{"dup":29,"safe-buffer":163}],183:[function(require,module,exports){
 (function (process){
 var Transform = require('readable-stream/transform')
   , inherits  = require('util').inherits
@@ -20851,7 +22160,7 @@ module.exports.obj = through2(function (options, transform, flush) {
 })
 
 }).call(this,require('_process'))
-},{"_process":13,"readable-stream/transform":173,"util":33,"xtend":179}],176:[function(require,module,exports){
+},{"_process":13,"readable-stream/transform":181,"util":33,"xtend":187}],184:[function(require,module,exports){
 (function (Buffer){
 /**
  * Convert a typed array to a Buffer without a copy
@@ -20874,7 +22183,7 @@ module.exports = function (arr) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":4}],177:[function(require,module,exports){
+},{"buffer":4}],185:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -21290,9 +22599,9 @@ URL.qs = qs;
 module.exports = URL;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"querystringify":138,"requires-port":154}],178:[function(require,module,exports){
+},{"querystringify":146,"requires-port":162}],186:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],179:[function(require,module,exports){
+},{"dup":30}],187:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -21313,9 +22622,92 @@ function extend() {
     return target
 }
 
-},{}],180:[function(require,module,exports){
+},{}],188:[function(require,module,exports){
+var bel = require('bel') // turns template tag into DOM elements
+var morphdom = require('morphdom') // efficiently diffs + morphs two DOM elements
+var defaultEvents = require('./update-events.js') // default events to be copied when dom elements update
+
+module.exports = bel
+
+// TODO move this + defaultEvents to a new module once we receive more feedback
+module.exports.update = function (fromNode, toNode, opts) {
+  if (!opts) opts = {}
+  if (opts.events !== false) {
+    if (!opts.onBeforeElUpdated) opts.onBeforeElUpdated = copier
+  }
+
+  return morphdom(fromNode, toNode, opts)
+
+  // morphdom only copies attributes. we decided we also wanted to copy events
+  // that can be set via attributes
+  function copier (f, t) {
+    // copy events:
+    var events = opts.events || defaultEvents
+    for (var i = 0; i < events.length; i++) {
+      var ev = events[i]
+      if (t[ev]) { // if new element has a whitelisted attribute
+        f[ev] = t[ev] // update existing element
+      } else if (f[ev]) { // if existing element has it and new one doesnt
+        f[ev] = undefined // remove it from existing element
+      }
+    }
+    var oldValue = f.value
+    var newValue = t.value
+    // copy values for form elements
+    if ((f.nodeName === 'INPUT' && f.type !== 'file') || f.nodeName === 'SELECT') {
+      if (!newValue && !t.hasAttribute('value')) {
+        t.value = f.value
+      } else if (newValue !== oldValue) {
+        f.value = newValue
+      }
+    } else if (f.nodeName === 'TEXTAREA') {
+      if (t.getAttribute('value') === null) f.value = t.value
+    }
+  }
+}
+
+},{"./update-events.js":189,"bel":55,"morphdom":125}],189:[function(require,module,exports){
+module.exports = [
+  // attribute events (can be set with attributes)
+  'onclick',
+  'ondblclick',
+  'onmousedown',
+  'onmouseup',
+  'onmouseover',
+  'onmousemove',
+  'onmouseout',
+  'ondragstart',
+  'ondrag',
+  'ondragenter',
+  'ondragleave',
+  'ondragover',
+  'ondrop',
+  'ondragend',
+  'onkeydown',
+  'onkeypress',
+  'onkeyup',
+  'onunload',
+  'onabort',
+  'onerror',
+  'onresize',
+  'onscroll',
+  'onselect',
+  'onchange',
+  'onsubmit',
+  'onreset',
+  'onfocus',
+  'onblur',
+  'oninput',
+  // other common events
+  'oncontextmenu',
+  'onfocusin',
+  'onfocusout'
+]
+
+},{}],190:[function(require,module,exports){
 const WebDB = require('@beaker/webdb')
 const assert = require('assert')
+const yo = require('yo-yo')
 var webdb = new WebDB('flights')
 
 console.log('BOOP BEEP')
@@ -21333,17 +22725,40 @@ webdb.define('flights', {
   ]
 })
 
+function table(flights) {
+  return yo`<table>
+    <tr>
+      <th>icao</th>
+      <th>callsign</ht>
+      <th>Heading</th>
+      <th>Lat</th>
+      <th>Lon</th>
+    </tr>
+    ${flights.map(function(flight) {
+      return yo`<tr>
+          <td>${flight.icao}</td>
+          <td>${flight.callsign}</td>
+          <td>${flight.heading}</td>
+          <td>${flight.lat}</td>
+          <td>${flight.lng}</td>
+        </tr>`
+    })}
+    </table>`
+}
+
 async function run() {
   await webdb.open()
   console.log('Open DB')
 
-  await webdb.indexArchive('dat://6c14108eab535dfd4b950ced85ddbe1d9eda10122b9895b86b7a6cc8c8027c8f')
+  await webdb.indexArchive('dat://d89ec0a7b53f0be87069f707da8abb77f23d6c1abb3915e0afee637d9555af20')
   console.log('indexed...')
 
   var allFlights = await webdb.flights.toArray()
   console.log(allFlights)
+  var flightTable = table(allFlights)
+  document.body.appendChild(flightTable)
 }
 
 run()
 
-},{"@beaker/webdb":34,"assert":1}]},{},[180]);
+},{"@beaker/webdb":34,"assert":1,"yo-yo":188}]},{},[190]);
