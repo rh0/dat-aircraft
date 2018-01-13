@@ -1,11 +1,31 @@
 const WebDB = require('@beaker/webdb')
 const assert = require('assert')
-const yo = require('yo-yo')
-var webdb = new WebDB('flights')
+//const yo = require('yo-yo')
+const d3 = require('d3')
+const webdb = new WebDB('flights')
 
-console.log('BOOP BEEP')
+const svg = d3.select("#map").append("svg")
+            .attr("width", 1300)
+            .attr("height", 800)
 
-webdb.define('flights', {
+const geoProjection = d3.geoMercator()
+const path = d3.geoPath().projection(geoProjection)
+
+const archive = new DatArchive('dat://a7f4c0fa33c33d5589e5f638d369c75e028a7a0136d31630a1d914242d9b2457/')
+
+//console.log(archive)
+
+async function grabJSON() {
+  var atxRoadsJSON = await archive.readFile('/atx-roads.json')
+  atxRoads = JSON.parse(atxRoadsJSON)
+
+  svg.append('path')
+      .attr('d', path(atxRoads))
+}
+
+grabJSON()
+
+/*webdb.define('flights', {
   // validate required attributes before indexing
   validate(record) {
     assert(record.icao && typeof record.icao === 'number')
@@ -65,4 +85,4 @@ provision()
 webdb.on('indexes-updated', (url, version) => {
   update()
 })
-document.body.appendChild(flightTable)
+document.body.appendChild(flightTable)*/
