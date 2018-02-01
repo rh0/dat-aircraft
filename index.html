@@ -1,16 +1,22 @@
 <!doctype html>
 <head>
 <style>
+  body {
+    padding: 0;
+    margin: 0;
+  }
   path {
-    fill: #ccc;
-    stroke: #000;
+    fill: #fff;
+    stroke: #aaa;
     stroke-linejoin: round;
   }
 </style>
 </head>
 <body>
-<h1>DAT Aircraft</h1>
-<h3>WEBDB Client for Dat-ADSB reciever stations.</h3>
-<div id="map"></div>
+<div id="map">
+  <svg width="100%" height="100vh">
+    <g class="map"></g>
+  </svg>
+</div>
 <script src="build.js"></script>
 </body>

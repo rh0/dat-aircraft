@@ -41799,25 +41799,76 @@ const WebDB = require('@beaker/webdb')
 const assert = require('assert')
 //const yo = require('yo-yo')
 const d3 = require('d3')
-const webdb = new WebDB('flights')
+//const webdb = new WebDB('flights')
 
-const svg = d3.select("#map").append("svg")
-            .attr("width", 1300)
-            .attr("height", 800)
+var geojson
+var mapState = {
+  scale: 153600,
+  translateX: 600,
+  translateY: 400,
+  centerLon: -97.733,
+  centerLat: 30.266
+}
+var projection
+var geoGenerator = d3.geoPath().projection(projection)
 
-const geoProjection = d3.geoMercator()
-const path = d3.geoPath().projection(geoProjection)
+function updateMap() {
+  projection = d3.geoEquirectangular()
+  geoGenerator.projection(projection)
+
+  projection
+    .center([mapState.centerLon, mapState.centerLat])
+    .scale(mapState.scale)
+    .translate([mapState.translateX, mapState.translateY])
+
+  var u = d3.select('#map g.map')
+    .selectAll('path')
+    .data(geojson.features)
+
+  u.enter()
+    .append('path')
+    .merge(u)
+    .attr('d', geoGenerator)
+}
+
+var initialX,
+    initialY
+
+function mouseMapMove(e) {
+  console.log('move')
+  transformX = e.clientX - initialX
+  transformY = e.clientY - initialY
+
+  mapState.translateX = mapState.translateX + (transformX / 2)
+  mapState.translateY = mapState.translateY + (transformY / 2)
+  console.log('mX: %d, mY: %d', mapState.translateX, mapState.translateY)
+  console.log('X: %d, Y: %d', transformX, transformY)
+  updateMap();
+}
+
+
+document.addEventListener('mousedown', function(e) {
+  initialX = e.clientX
+  initialY = e.clientY
+  console.log('down');
+  document.addEventListener('mousemove', mouseMapMove, true)
+}, true)
+
+document.addEventListener('mouseup', function(e) {
+  console.log('up')
+  document.removeEventListener('mousemove', mouseMapMove)
+})
+
+
 
 const archive = new DatArchive('dat://a7f4c0fa33c33d5589e5f638d369c75e028a7a0136d31630a1d914242d9b2457/')
 
 //console.log(archive)
 
 async function grabJSON() {
-  var atxRoadsJSON = await archive.readFile('/atx-roads.json')
-  atxRoads = JSON.parse(atxRoadsJSON)
-
-  svg.append('path')
-      .attr('d', path(atxRoads))
+  var atxRoadsJSON = await archive.readFile('/atx-roads-rough.json')
+  geojson = JSON.parse(atxRoadsJSON)
+  updateMap()
 }
 
 grabJSON()
@@ -41865,11 +41916,11 @@ async function provision() {
   await webdb.open()
   console.log('Open DB')
 
-  await webdb.indexArchive('dat://d89ec0a7b53f0be87069f707da8abb77f23d6c1abb3915e0afee637d9555af20')
+  await webdb.indexArchive('dat://42c615f4fa11a5ccaf890fef14e31b7c3089861a66ffdce1b5e3b29fe67c9709/')
   console.log('indexed...')
 
   var allFlights = await webdb.flights.toArray()
-  console.log(allFlights)
+  //console.log(allFlights)
 }
 
 async function update() {
