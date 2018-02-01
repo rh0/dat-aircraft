@@ -34,32 +34,29 @@ function updateMap() {
     .attr('d', geoGenerator)
 }
 
-var initialX,
-    initialY
+var lastX,
+    lastY
 
 function mouseMapMove(e) {
-  console.log('move')
-  transformX = e.clientX - initialX
-  transformY = e.clientY - initialY
+  transformX = e.clientX - lastX
+  transformY = e.clientY - lastY
+  lastX = e.clientX
+  lastY = e.clientY
 
-  mapState.translateX = mapState.translateX + (transformX / 2)
-  mapState.translateY = mapState.translateY + (transformY / 2)
-  console.log('mX: %d, mY: %d', mapState.translateX, mapState.translateY)
-  console.log('X: %d, Y: %d', transformX, transformY)
+  mapState.translateX = mapState.translateX + transformX
+  mapState.translateY = mapState.translateY + transformY
   updateMap();
 }
 
 
 document.addEventListener('mousedown', function(e) {
-  initialX = e.clientX
-  initialY = e.clientY
-  console.log('down');
+  lastX = e.clientX
+  lastY = e.clientY
   document.addEventListener('mousemove', mouseMapMove, true)
 }, true)
 
 document.addEventListener('mouseup', function(e) {
-  console.log('up')
-  document.removeEventListener('mousemove', mouseMapMove)
+  document.removeEventListener('mousemove', mouseMapMove, true)
 })
 
 
