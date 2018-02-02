@@ -2,9 +2,13 @@ const WebDB = require('@beaker/webdb')
 const assert = require('assert')
 //const yo = require('yo-yo')
 const d3 = require('d3')
+const topojson = require('topojson')
 //const webdb = new WebDB('flights')
 
-var geojson
+var geojson,
+    waterjson,
+    waterwayjson
+
 var mapState = {
   scale: 153600,
   translateX: 600,
@@ -12,26 +16,41 @@ var mapState = {
   centerLon: -97.733,
   centerLat: 30.266
 }
-var projection
-var geoGenerator = d3.geoPath().projection(projection)
+
+var projection = d3.geoEquirectangular()
+var geoGenerator = d3.geoPath()
+var u = d3.select('#map g.map')
 
 function updateMap() {
-  projection = d3.geoEquirectangular()
-  geoGenerator.projection(projection)
-
   projection
     .center([mapState.centerLon, mapState.centerLat])
     .scale(mapState.scale)
     .translate([mapState.translateX, mapState.translateY])
 
-  var u = d3.select('#map g.map')
-    .selectAll('path')
-    .data(geojson.features)
+  geoGenerator.projection(projection)
 
-  u.enter()
+  u.selectAll('path.waterway')
+    .data(waterwayjson.features)
+    .enter().append('path')
+    .attr('d', geoGenerator)
+    .attr('class', 'waterway')
+
+  u.selectAll('path.roads')
+    .data(geojson.features)
+    .enter().append('path')
+    .attr('d', geoGenerator)
+    .attr('class', 'roads')
+
+  u.selectAll('path.water')
+    .data(waterjson.features)
+    .enter().append('path')
+    .attr('d', geoGenerator)
+    .attr('class', 'water')
+
+  /*u.enter()
     .append('path')
     .merge(u)
-    .attr('d', geoGenerator)
+    .attr('d', geoGenerator)*/
 }
 
 var lastX,
@@ -66,8 +85,12 @@ const archive = new DatArchive('dat://a7f4c0fa33c33d5589e5f638d369c75e028a7a0136
 //console.log(archive)
 
 async function grabJSON() {
-  var atxRoadsJSON = await archive.readFile('/atx-roads-rough.json')
+  var atxRoadsJSON = await archive.readFile('/roughroads.json')
+  var atxWaterJSON = await archive.readFile('/waterarea.json')
+  var atxWaterWayJSON = await archive.readFile('/waterways.json')
   geojson = JSON.parse(atxRoadsJSON)
+  waterjson = JSON.parse(atxWaterJSON)
+  waterwayjson = JSON.parse(atxWaterWayJSON)
   updateMap()
 }
 
