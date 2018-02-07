@@ -3,7 +3,7 @@ const assert = require('assert')
 //const yo = require('yo-yo')
 const d3 = require('d3')
 //const topojson = require('topojson')
-//const webdb = new WebDB('flights')
+const webdb = new WebDB('flights')
 
 var geojson,
     waterjson,
@@ -21,19 +21,18 @@ var zoom = d3.zoom()
     .on("zoom", zoomed)
 
 var projection = d3.geoEquirectangular()
+projection
+  .center([mapState.centerLon, mapState.centerLat])
+  .scale(mapState.scale)
+  .translate([mapState.translateX, mapState.translateY])
 var geoGenerator = d3.geoPath()
 var svg = d3.select('body').append('svg')
     .attr('width', '100%')
-    .attr('height', '100vh')
+    .attr('height', '99vh')
 
 var u = svg.append('g')
 
 function updateMap() {
-  projection
-    .center([mapState.centerLon, mapState.centerLat])
-    .scale(mapState.scale)
-    .translate([mapState.translateX, mapState.translateY])
-
   geoGenerator.projection(projection)
 
   u.selectAll('path.waterway')
@@ -61,6 +60,19 @@ function updateMap() {
     .on('zoom.event')
 }
 
+function updateFlightPath() {
+  for(var idx in allFlights) {
+    updateFlight = allFlights[idx]
+
+    if(updateFlight.oldLat !== undefined) {
+      u.append('path')
+      .datum({type: 'LineString', coordinates: [[updateFlight.oldLng, updateFlight.oldLat],[updateFlight.lng, updateFlight.lat]]})
+      .attr('class', 'flight ' + updateFlight.icao)
+      .attr('d', geoGenerator)
+    }
+  }
+}
+
 function zoomed() {
   var transform = d3.event.transform;
   u.attr('transform', transform)
@@ -84,7 +96,7 @@ async function grabJSON() {
 
 grabJSON()
 
-/*webdb.define('flights', {
+webdb.define('flights', {
   // validate required attributes before indexing
   validate(record) {
     assert(record.icao && typeof record.icao === 'number')
@@ -98,50 +110,48 @@ grabJSON()
 })
 
 var allFlights = [];
-var flightTable = table(allFlights)
-
-function table(flights) {
-  return yo`<table>
-    <tr>
-      <th>icao</th>
-      <th>callsign</ht>
-      <th>Heading</th>
-      <th>Lat</th>
-      <th>Lon</th>
-      <th>Altitude</th>
-    </tr>
-    ${flights.map(function(flight) {
-      return yo`<tr>
-          <td>${flight.icao}</td>
-          <td>${flight.callsign}</td>
-          <td>${flight.heading}</td>
-          <td>${flight.lat}</td>
-          <td>${flight.lng}</td>
-          <td>${flight.altitude}</td>
-        </tr>`
-    })}
-    </table>`
-}
 
 async function provision() {
   await webdb.open()
   console.log('Open DB')
 
-  await webdb.indexArchive('dat://42c615f4fa11a5ccaf890fef14e31b7c3089861a66ffdce1b5e3b29fe67c9709/')
+  await webdb.indexArchive('dat://0d35b16c5423970018feb9633ac1f2680e68528e6ba0c8ca733ef1c6194769e9')
   console.log('indexed...')
 
-  var allFlights = await webdb.flights.toArray()
-  //console.log(allFlights)
+  var fetchedFlights = await webdb.flights.toArray()
+  updateFlights(fetchedFlights)
+}
+
+function updateFlights(fetchedFlights) {
+  for(var flight in fetchedFlights) {
+    flightUpdate = fetchedFlights[flight]
+    if(allFlights[flightUpdate.icao] !== undefined) {
+      allFlights[flightUpdate.icao] = {
+        oldLat: allFlights[flightUpdate.icao].lat,
+        oldLng: allFlights[flightUpdate.icao].lng,
+        lat: flightUpdate.lat,
+        lng: flightUpdate.lng
+      }
+    }
+    else {
+      allFlights[flightUpdate.icao] = {
+        lat: flightUpdate.lat,
+        lng: flightUpdate.lng
+      }
+    }
+  }
+  updateFlightPath();
 }
 
 async function update() {
-  allFlights = await webdb.flights.toArray()
-  var newTable = table(allFlights)
-  yo.update(flightTable, newTable)
+  fetchedFlights = await webdb.flights.toArray()
+  updateFlights(fetchedFlights)
+  //var newTable = table(allFlights)
+  //yo.update(flightTable, newTable)
 }
 
 provision()
 webdb.on('indexes-updated', (url, version) => {
   update()
 })
-document.body.appendChild(flightTable)*/
+//document.body.appendChild(flightTable)*/
