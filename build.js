@@ -41804,7 +41804,8 @@ const webdb = new WebDB('flights')
 
 var geojson,
     waterjson,
-    waterwayjson
+    waterwayjson,
+    airwayjson
 
 var mapState = {
   scale: 153600,
@@ -41853,6 +41854,13 @@ function updateMap() {
       .attr('d', geoGenerator)
       .attr('class', 'roads')
 
+  u.selectAll('path.airway')
+    .data(airwayjson.features)
+    .enter().append('path')
+    .merge(u)
+      .attr('d', geoGenerator)
+      .attr('class', 'airway')
+
   svg.call(zoom)
     .on('zoom.event')
 }
@@ -41885,9 +41893,11 @@ async function grabJSON() {
   var atxRoadsJSON = await archive.readFile('/roadsmid.json')
   var atxWaterJSON = await archive.readFile('/waterarea.json')
   var atxWaterWayJSON = await archive.readFile('/waterways.json')
+  var atxAirWayJSON = await archive.readFile('/airways.json')
   geojson = JSON.parse(atxRoadsJSON)
   waterjson = JSON.parse(atxWaterJSON)
   waterwayjson = JSON.parse(atxWaterWayJSON)
+  airwayjson = JSON.parse(atxAirWayJSON)
   updateMap()
 }
 
