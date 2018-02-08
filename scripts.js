@@ -69,14 +69,30 @@ function updateMap() {
 }
 
 function updateFlightPath() {
-  for(var idx in allFlights) {
-    updateFlight = allFlights[idx]
+  for(var icao in allFlights) {
+    updateFlight = allFlights[icao]
 
-    if(updateFlight.oldLat !== undefined) {
+    if(updateFlight.oldLat !== undefined && updateFlight.oldLat !== updateFlight.lat) {
+      //console.log('%s old: %f new: %f', idx, updateFlight.oldLat, updateFlight.lat)
       u.append('path')
       .datum({type: 'LineString', coordinates: [[updateFlight.oldLng, updateFlight.oldLat],[updateFlight.lng, updateFlight.lat]]})
-      .attr('class', 'flight ' + updateFlight.icao)
+      .attr('class', 'flight icao-' + icao)
       .attr('d', geoGenerator)
+
+      u.selectAll('path.icao-' + icao)
+        .interrupt()
+
+      u.selectAll('path.icao-' + icao)
+        .interrupt()
+
+      u.selectAll('path.icao-' + icao)
+        .style('stroke-opacity', 1)
+
+      u.selectAll('path.icao-' + icao)
+        .transition(d3.transition()
+          .duration(120000)
+          .ease(d3.easeLinear))
+          .style('stroke-opacity', 0)
     }
   }
 }
