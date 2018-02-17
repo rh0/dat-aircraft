@@ -41797,9 +41797,7 @@ arguments[4][48][0].apply(exports,arguments)
 },{"dup":48}],227:[function(require,module,exports){
 const WebDB = require('@beaker/webdb')
 const assert = require('assert')
-//const yo = require('yo-yo')
 const d3 = require('d3')
-//const topojson = require('topojson')
 const webdb = new WebDB('flights')
 
 var geojson,
@@ -41969,14 +41967,14 @@ function updateFlights(fetchedFlights) {
 async function update() {
   fetchedFlights = await webdb.flights.toArray()
   updateFlights(fetchedFlights)
-  //var newTable = table(allFlights)
-  //yo.update(flightTable, newTable)
 }
 
 provision()
+/*webdb.on('source-indexed', (url, version) => {
+  console.log('Source Indexed.')
+})*/
 webdb.on('indexes-updated', (url, version) => {
   update()
 })
-//document.body.appendChild(flightTable)*/
 
 },{"@beaker/webdb":49,"assert":1,"d3":102}]},{},[227]);

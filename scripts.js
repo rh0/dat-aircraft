@@ -173,6 +173,9 @@ async function update() {
 }
 
 provision()
+/*webdb.on('source-indexed', (url, version) => {
+  console.log('Source Indexed.')
+})*/
 webdb.on('indexes-updated', (url, version) => {
   update()
 })
