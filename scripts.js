@@ -23,7 +23,7 @@ async function provision() {
   await webdb.open()
   console.log('Open DB')
 
-  await webdb.indexArchive('dat://7a62116df8bd953cb9075a11930b1e67b32bf12da5ff8d5f2592017cdca37198')
+  await webdb.indexArchive('dat://0c9392cc7f90c9f415cca4d5c92f4effbf4b2359291fa3c8153f195c16a0afea')
   console.log('indexed...')
 
 
