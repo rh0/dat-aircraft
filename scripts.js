@@ -23,8 +23,9 @@ async function provision() {
   await webdb.open()
   console.log('Open DB')
 
-  await webdb.indexArchive('dat://0d35b16c5423970018feb9633ac1f2680e68528e6ba0c8ca733ef1c6194769e9')
+  await webdb.indexArchive('dat://7a62116df8bd953cb9075a11930b1e67b32bf12da5ff8d5f2592017cdca37198')
   console.log('indexed...')
+
 
   var fetchedFlights = await webdb.flights.toArray()
   updateFlights(fetchedFlights)
@@ -62,4 +63,12 @@ provision()
 })*/
 webdb.on('indexes-updated', (url, version) => {
   update()
+})
+
+webdb.on('source-missing', (url) => {
+  console.log('WebDB could not find', url, ' ...continues searching')
+})
+
+webdb.on('source-error', (url, err) => {
+  console.log('An error has occured for ', url, ': ',err)
 })
