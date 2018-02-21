@@ -39,13 +39,15 @@ function updateFlights(fetchedFlights) {
         oldLat: allFlights[flightUpdate.icao].lat,
         oldLng: allFlights[flightUpdate.icao].lng,
         lat: flightUpdate.lat,
-        lng: flightUpdate.lng
+        lng: flightUpdate.lng,
+        callsign: flightUpdate.callsign
       }
     }
     else {
       allFlights[flightUpdate.icao] = {
         lat: flightUpdate.lat,
-        lng: flightUpdate.lng
+        lng: flightUpdate.lng,
+        callsign: flightUpdate.callsign
       }
     }
   }

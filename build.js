@@ -9043,11 +9043,22 @@ exports.updateFlightPath = function(flights) {
     updateFlight = flights[icao]
 
     if(updateFlight.oldLat !== undefined && updateFlight.oldLat !== updateFlight.lat) {
-      u.select('.plane.icao-' + icao).remove();
+      u.selectAll('.plane.icao-' + icao).remove();
       u.append('path')
         .datum({type: 'Point', coordinates: [updateFlight.lng, updateFlight.lat]})
         .attr('class', 'plane flight icao-' + icao)
         .attr('d', geoGenerator)
+
+      u.selectAll('.callsign.icao-' + icao).remove();
+
+      u.append('text')
+        .attr('class', 'callsign icao-' + icao)
+        .attr('transform', function() {
+          return "translate(" + projection([updateFlight.lng, updateFlight.lat]) + ")"
+        })
+        .attr('dx', 10)
+        .attr('dy', -10)
+        .text(updateFlight.callsign)
 
       //console.log('%s old: %f new: %f', idx, updateFlight.oldLat, updateFlight.lat)
       u.append('path')
@@ -9055,18 +9066,20 @@ exports.updateFlightPath = function(flights) {
         .attr('class', 'flight icao-' + icao)
         .attr('d', geoGenerator)
 
-      u.selectAll('path.icao-' + icao)
+      u.selectAll('.icao-' + icao)
         .interrupt()
 
-      u.selectAll('path.icao-' + icao)
+      u.selectAll('.icao-' + icao)
+        .style('fill-opacity', 1)
         .style('stroke-opacity', 1)
 
-      u.selectAll('path.icao-' + icao)
+      u.selectAll('.icao-' + icao)
         .transition(d3.transition()
           .duration(120000)
           .ease(d3.easeLinear))
           .style('stroke-opacity', 0)
           .style('fill-opacity', 0)
+          .remove();
     }
   }
 }
@@ -41939,13 +41952,15 @@ function updateFlights(fetchedFlights) {
         oldLat: allFlights[flightUpdate.icao].lat,
         oldLng: allFlights[flightUpdate.icao].lng,
         lat: flightUpdate.lat,
-        lng: flightUpdate.lng
+        lng: flightUpdate.lng,
+        callsign: flightUpdate.callsign
       }
     }
     else {
       allFlights[flightUpdate.icao] = {
         lat: flightUpdate.lat,
-        lng: flightUpdate.lng
+        lng: flightUpdate.lng,
+        callsign: flightUpdate.callsign
       }
     }
   }
