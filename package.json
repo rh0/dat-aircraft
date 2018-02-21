@@ -9,8 +9,7 @@
     "assert": "^1.4.1"
   },
   "directories": {
-    "lib": "lib",
-    "bin": "maps"
+    "lib": "lib"
   },
   "keywords": [
     "dat",
