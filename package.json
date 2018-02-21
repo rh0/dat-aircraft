@@ -1,0 +1,39 @@
+{
+  "name": "webdb-adsb-client",
+  "version": "0.1.0",
+  "description": "WebDB example client for dat-adsb",
+  "main": "build.js",
+  "dependencies": {
+    "@beaker/webdb": "^4.1.0",
+    "d3": "^4.0.0",
+    "assert": "^1.4.1"
+  },
+  "directories": {
+    "lib": "lib",
+    "bin": "maps"
+  },
+  "keywords": [
+    "dat",
+    "beaker",
+    "d3",
+    "map",
+    "ads-b",
+    "adsb",
+    "sdr",
+    "radio",
+    "1090",
+    "1090mhz",
+    "rtlsdr",
+    "librtlsdr",
+    "airplane",
+    "plane"
+  ],
+  "author": "Ryan Oles (https://electro.pizza)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rh0/webdb-aircraft"
+  },
+  "homepage": "https://github.com/rh0/webdb-aircraft",
+  "browser": "./scripts.js"
+}
