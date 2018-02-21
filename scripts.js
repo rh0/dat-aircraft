@@ -1,8 +1,8 @@
 const WebDB = require('@beaker/webdb')
 const assert = require('assert')
-const webdb = new WebDB('flights')
 const map = require('./lib/map')
 
+const webdb = new WebDB('flights')
 
 webdb.define('flights', {
   // validate required attributes before indexing
