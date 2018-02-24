@@ -13,7 +13,7 @@ webdb.define('flights', {
 
   // files to index
   filePattern: [
-    '/*.json'
+    '/flight_data/*.json'
   ]
 })
 
@@ -23,7 +23,7 @@ async function provision() {
   await webdb.open()
   console.log('Open DB')
 
-  await webdb.indexArchive('dat://0c9392cc7f90c9f415cca4d5c92f4effbf4b2359291fa3c8153f195c16a0afea')
+  await webdb.indexArchive('dat://879a67f30e8ccd117c731c9eb4d7f45a8200bcc58bffa20c77855e3980ecaf72')
   console.log('indexed...')
 
 
