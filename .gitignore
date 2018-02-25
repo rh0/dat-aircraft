@@ -1,3 +1,4 @@
 .dat
 package-lock.json
 node_modules
+assets/index.js
