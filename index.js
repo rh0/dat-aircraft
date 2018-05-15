@@ -2,7 +2,10 @@ const WebDB = require('@beaker/webdb')
 const assert = require('assert')
 const map = require('./lib/map')
 
-const webdb = new WebDB('flights')
+const webdb = new WebDB('flights', {
+    sparse: true,
+    sparseMetadata: true
+  })
 
 webdb.define('flights', {
   // validate required attributes before indexing
