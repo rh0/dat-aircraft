@@ -20,12 +20,10 @@ webdb.define('flights', {
 var allFlights = [];
 
 async function provision() {
+  await webdb.delete()
   await webdb.open()
-  console.log('Open DB')
 
-  await webdb.indexArchive('dat://879a67f30e8ccd117c731c9eb4d7f45a8200bcc58bffa20c77855e3980ecaf72')
-  console.log('indexed...')
-
+  await webdb.indexArchive('dat://5263608e35f922e50999b5dd55a33055c324a913f707494d8e796586c09c7f24')
 
   var fetchedFlights = await webdb.flights.toArray()
   updateFlights(fetchedFlights)
@@ -60,15 +58,33 @@ async function update() {
 }
 
 provision()
-/*webdb.on('source-indexed', (url, version) => {
-  //console.log('Source Indexed.')
-})*/
+
+webdb.on('open', () => {
+  console.log('Database opened.')
+})
+
+webdb.on('open-failed', (err) => {
+  console.log('Database failed to open', err)
+})
+
 webdb.on('indexes-updated', (url, version) => {
   update()
 })
 
 webdb.on('source-missing', (url) => {
   console.log('WebDB could not find', url, ' ...continues searching')
+})
+
+webdb.on('source-found', (url) => {
+  console.log('WebDB found:', url)
+})
+
+/*webdb.on('source-indexed', (url, version) => {
+  console.log('Source Indexed: Tables were updated for', url, 'at version', version)
+})*/
+
+webdb.on('indexes-reset', () => {
+  console.log('WebDB detected a change in schemas and reset all indexes')
 })
 
 webdb.on('source-error', (url, err) => {

@@ -4,9 +4,9 @@
   "description": "WebDB example client for dat-adsb",
   "main": "build.js",
   "dependencies": {
-    "@beaker/webdb": "^4.1.0",
-    "d3": "^4.0.0",
-    "assert": "^1.4.1"
+    "@beaker/webdb": "^4.1.2",
+    "assert": "^1.4.1",
+    "d3": "^4.0.0"
   },
   "directories": {
     "lib": "lib"
