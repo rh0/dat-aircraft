@@ -28,7 +28,7 @@ path.roads {
 }
 path.flight {
   fill: #fff;
-  fill-opacity: 0;
+  fill-opacity: 0 !important;
   stroke: red;
   stroke-linejoin: round;
 }
