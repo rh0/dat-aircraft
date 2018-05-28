@@ -69,11 +69,14 @@ async function update() {
     map.updateFlightPath(allFlights);
   })*/
 
- // Flight is gone so remove from the array.
-  webdb.flights.on('del-record', ({url, origin, indexedAt}) => {
+  // Rework how things are removed from the archive in dat-adsb
+  // funny stuff happens here with flights going in and out, but
+  // it would be good to clean up the array when flights are removed.
+  // Flight is gone so remove from the array.
+  /*webdb.flights.on('del-record', ({url, origin, indexedAt}) => {
     var icao = url.split('/').pop().split('.').shift()
     allFlights.splice(icao, 1)
-  })
+  })*/
 
 })()
 
