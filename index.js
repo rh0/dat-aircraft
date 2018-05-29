@@ -63,7 +63,7 @@ async function update() {
     }
   }
 
-  await webdb.indexArchive('dat://5263608e35f922e50999b5dd55a33055c324a913f707494d8e796586c09c7f24')
+  await webdb.indexArchive('dat://629d0514f3b059b0aaf2f8e8376b7713c2a05e5fc8f125df3560d29305d8ab00')
 
   var fetchedFlights = await webdb.flights.toArray()
   updateAllFlights(fetchedFlights)
