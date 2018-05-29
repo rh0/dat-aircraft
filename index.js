@@ -55,6 +55,14 @@ async function update() {
   await webdb.delete()
   await webdb.open()
 
+  // Make double sure its unindexed
+  var urls = await webdb.listSources()
+  if(urls.length > 0) {
+    for(var url in urls) {
+      await webdb.unindexArchive(urls[url])
+    }
+  }
+
   await webdb.indexArchive('dat://5263608e35f922e50999b5dd55a33055c324a913f707494d8e796586c09c7f24')
 
   var fetchedFlights = await webdb.flights.toArray()
